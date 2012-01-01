@@ -1,0 +1,6 @@
+*.pyc
+.config
+ns-3.12/build/
+ns-3.12/.waf*/
+ns-3.12/different.pcap
+ns-3.12/.lock-wscript
