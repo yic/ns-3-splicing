@@ -60,5 +60,10 @@ GlobalRouteManager::AllocateRouterId (void)
   return routerId++;
 }
 
+void GlobalRouteManager::ClearLSDB()
+{
+    SimulationSingleton<GlobalRouteManagerImpl>::Get()->
+        ClearLSDB();
+}
 
 } // namespace ns3

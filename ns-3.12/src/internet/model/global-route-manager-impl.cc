@@ -2188,6 +2188,12 @@ GlobalRouteManagerImpl::SPFVertexAddParent (SPFVertex* v)
     }
 }
 
+void GlobalRouteManagerImpl::ClearLSDB()
+{
+    delete m_lsdb;
+    m_lsdb = new GlobalRouteManagerLSDB();
+}
+
 } // namespace ns3
 
 

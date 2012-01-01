@@ -741,6 +741,8 @@ public:
  */
   void DebugSPFCalculate (Ipv4Address root);
 
+  virtual void ClearLSDB();
+
 private:
 /**
  * @brief GlobalRouteManagerImpl copy construction is disallowed.

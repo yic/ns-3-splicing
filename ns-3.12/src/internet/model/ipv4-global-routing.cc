@@ -596,5 +596,45 @@ Ipv4GlobalRouting::SetIpv4 (Ptr<Ipv4> ipv4)
   m_ipv4 = ipv4;
 }
 
+void Ipv4GlobalRouting::CopyRoutingTablesFrom(Ipv4GlobalRouting *globalRouting)
+{
+    ClearRoutingTables();
+
+    //copy host routes
+    for (HostRoutesCI i = globalRouting->m_hostRoutes.begin(); i != globalRouting->m_hostRoutes.end(); i++)
+    {
+        Ipv4RoutingTableEntry *route = new Ipv4RoutingTableEntry(*i);
+        m_hostRoutes.push_back(route);
+    }
+
+    //copy network routes
+    for (NetworkRoutesI j = globalRouting->m_networkRoutes.begin(); j != globalRouting->m_networkRoutes.end(); j++)
+    {
+        Ipv4RoutingTableEntry *route = new Ipv4RoutingTableEntry(*j);
+        m_networkRoutes.push_back(route);
+    }
+
+    //copy external routes
+    for (ASExternalRoutesI k = globalRouting->m_ASexternalRoutes.begin(); k != globalRouting->m_ASexternalRoutes.end(); k++)
+    {
+        Ipv4RoutingTableEntry *route = new Ipv4RoutingTableEntry(*k);
+        m_ASexternalRoutes.push_back(route);
+    }
+}
+
+void Ipv4GlobalRouting::ClearRoutingTables(void)
+{
+    for (HostRoutesI i = m_hostRoutes.begin(); i != m_hostRoutes.end(); i++)
+        delete (*i);
+    m_hostRoutes.clear();
+
+    for (NetworkRoutesI j = m_networkRoutes.begin(); j != m_networkRoutes.end(); j++)
+        delete (*j);
+    m_networkRoutes.clear();
+
+    for (ASExternalRoutesI k = m_ASexternalRoutes.begin(); k != m_ASexternalRoutes.end(); k++)
+        delete (*k);
+    m_ASexternalRoutes.clear();
+}
 
 } // namespace ns3

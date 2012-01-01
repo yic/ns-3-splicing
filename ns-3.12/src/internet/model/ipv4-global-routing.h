@@ -211,6 +211,11 @@ public:
  */
   void RemoveRoute (uint32_t i);
 
+  //Copy routing tables from another global routing instance
+  void CopyRoutingTablesFrom(Ipv4GlobalRouting *globalRouting);
+  //Remove all current routes
+  void ClearRoutingTables(void);
+
 protected:
   void DoDispose (void);
 

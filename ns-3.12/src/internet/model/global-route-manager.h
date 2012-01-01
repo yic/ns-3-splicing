@@ -67,6 +67,8 @@ public:
  */
   static void InitializeRoutes ();
 
+  static void ClearLSDB();
+
 private:
 /**
  * @brief Global Route Manager copy construction is disallowed.  There's no 
