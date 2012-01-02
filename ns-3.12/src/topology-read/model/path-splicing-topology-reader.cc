@@ -29,7 +29,7 @@ PathSplicingTopologyReader::PathSplicingTopologyReader()
 {
 }
 
-void PathSplicingTopologyReader::Load(std::string fileName, int nSlices,
+void PathSplicingTopologyReader::LoadTopology(std::string fileName, int nSlices,
         NodeContainer &routers, NodeContainer &hosts, NetDeviceContainer **r_h_ndc,
         NetDeviceContainer ***r_r_ndc, Ipv4InterfaceContainer **r_h_ic, Ipv4InterfaceContainer ***r_r_ic)
 {
@@ -177,13 +177,18 @@ void PathSplicingTopologyReader::Load(std::string fileName, int nSlices,
 
         ss.str("");
         ss << first << "." << second << "." << third << ".0";
-        std::cout << ss.str() << std::endl;
 
         ipv4Helper.SetBase(ss.str().c_str(), "255.255.255.0");
         NS_ASSERT((*r_h_ndc)[from].GetN() == 2);
         Ipv4InterfaceContainer ic = ipv4Helper.Assign((*r_h_ndc)[from]);
         (*r_h_ic)[from] = ic;
     }
+}
+
+void PathSplicingTopologyReader::LoadWeights(std::string filePrefix, int nSlices,
+        NodeContainer &routers, NodeContainer &hosts, NetDeviceContainer **r_h_ndc,
+        NetDeviceContainer ***r_r_ndc, Ipv4InterfaceContainer **r_h_ic, Ipv4InterfaceContainer ***r_r_ic)
+{
 
 }
 
