@@ -8,6 +8,7 @@ def build(bld):
        'model/orbis-topology-reader.cc',
        'model/rocketfuel-topology-reader.cc',
        'helper/topology-reader-helper.cc',
+       'helper/path-splicing-topology-reader-helper.cc',
         ]
 
     module_test = bld.create_ns3_module_test_library('topology-read')
@@ -23,6 +24,7 @@ def build(bld):
        'model/orbis-topology-reader.h',
        'model/rocketfuel-topology-reader.h',
        'helper/topology-reader-helper.h',
+       'helper/path-splicing-topology-reader-helper.h',
         ]
 
     if bld.env['ENABLE_EXAMPLES']:
