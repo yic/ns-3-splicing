@@ -36,10 +36,10 @@ int main (int argc, char *argv[])
 
     NodeContainer routers;
     NodeContainer hosts;
-    NetDeviceContainer **r_h_ndc = NULL;
-    NetDeviceContainer ***r_r_ndc = NULL;
-    Ipv4InterfaceContainer **r_h_ic = NULL;
-    Ipv4InterfaceContainer ***r_r_ic = NULL;
+    NetDeviceContainer *r_h_ndc = NULL;
+    NetDeviceContainer **r_r_ndc = NULL;
+    Ipv4InterfaceContainer *r_h_ic = NULL;
+    Ipv4InterfaceContainer **r_r_ic = NULL;
 
     PathSplicingTopologyReaderHelper readerHelper;
     Ptr<PathSplicingTopologyReader> reader = readerHelper.GetTopologyReader();
@@ -67,10 +67,25 @@ int main (int argc, char *argv[])
 
         NS_LOG_UNCOND("Fail link " << end0 << "-" << end1);
         //schedule link failures
-//      NS_ASSERT(r_r_ic[end0][end1]);
+//      NS_ASSERT(r_r_ic[end0][end1].GetN() == 2);
 //      Simulator::Schedule(Seconds(8),&Ipv4::SetDown, r_r_ic[end0][end1]->Get(0).first, r_r_ic[end0][end1]->Get(0).second);
 //      Simulator::Schedule(Seconds(8),&Ipv4::SetDown, r_r_ic[end0][end1]->Get(1).first, r_r_ic[end0][end1]->Get(1).second);
     }
+
+    //delete arrays
+    int node_num = routers.GetN();
+
+    delete [] r_h_ndc;
+
+    for (int i = 0; i < node_num; i ++)
+        delete [] r_r_ndc[i];
+    delete [] r_r_ndc;
+
+    delete [] r_h_ic;
+
+    for (int i = 0; i < node_num; i ++)
+        delete [] r_r_ic[i];
+    delete [] r_r_ic;
 
     return 0;
 }

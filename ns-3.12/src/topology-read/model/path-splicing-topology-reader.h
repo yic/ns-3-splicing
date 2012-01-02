@@ -13,8 +13,8 @@ class PathSplicingTopologyReader : public Object
 public:
     static TypeId GetTypeId(void);
     PathSplicingTopologyReader();
-    void Load(std::string fileName, int nSlices, NodeContainer &routers, NodeContainer &hosts, NetDeviceContainer ***r_h_ndc,
-            NetDeviceContainer ****r_r_ndc, Ipv4InterfaceContainer ***r_h_ic, Ipv4InterfaceContainer ****r_r_ic);
+    void Load(std::string fileName, int nSlices, NodeContainer &routers, NodeContainer &hosts, NetDeviceContainer **r_h_ndc,
+            NetDeviceContainer ***r_r_ndc, Ipv4InterfaceContainer **r_h_ic, Ipv4InterfaceContainer ***r_r_ic);
 private:
 };
 
