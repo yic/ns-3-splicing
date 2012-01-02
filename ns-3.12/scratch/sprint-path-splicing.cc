@@ -3,6 +3,7 @@
 #include "ns3/point-to-point-module.h"
 #include "ns3/internet-module.h"
 #include "ns3/applications-module.h"
+#include "ns3/topology-read-module.h"
 
 NS_LOG_COMPONENT_DEFINE("SprintPathSplicing");
 
@@ -26,7 +27,8 @@ std::vector<std::string> split(const std::string &s, char delim) {
 
 int main (int argc, char *argv[])
 {
-    std::string failedLinksStr = "";
+    std::string failedLinksStr("");
+    std::string latencyFileName("scratch/sprint/latency.orig");
 
     CommandLine cmd;
     cmd.AddValue("FailedLinks", "Links to fail, e.g., use --FailedLinks=A-B;C-D to fail links A-B and C-D", failedLinksStr);
@@ -34,10 +36,14 @@ int main (int argc, char *argv[])
 
     NodeContainer routers;
     NodeContainer hosts;
-//  NetDeviceContainer **r_h_ndc;
-//  NetDeviceContainer ***r_r_ndc;
-//  Ipv4InterfaceContainer **r_h_ic;
-//  Ipv4InterfaceContainer ***r_r_ic;
+    NetDeviceContainer **r_h_ndc = NULL;
+    NetDeviceContainer ***r_r_ndc = NULL;
+    Ipv4InterfaceContainer **r_h_ic = NULL;
+    Ipv4InterfaceContainer ***r_r_ic = NULL;
+
+    PathSplicingTopologyReaderHelper readerHelper;
+    Ptr<PathSplicingTopologyReader> reader = readerHelper.GetTopologyReader();
+    reader->Load(latencyFileName, 5, routers, hosts, &r_h_ndc, &r_r_ndc, &r_h_ic, &r_r_ic);
 
     //fail links
     std::vector<std::string> links = split(failedLinksStr, ';');
