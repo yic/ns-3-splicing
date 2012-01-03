@@ -29,7 +29,7 @@ PathSplicingTopologyReader::PathSplicingTopologyReader()
 {
 }
 
-void PathSplicingTopologyReader::LoadTopology(std::string fileName, int nSlices,
+void PathSplicingTopologyReader::Load(std::string latencyFileName, std::string weightFilePrefix, int nSlices,
         NodeContainer &routers, NodeContainer &hosts, NetDeviceContainer **r_h_ndc,
         NetDeviceContainer ***r_r_ndc, Ipv4InterfaceContainer **r_h_ic, Ipv4InterfaceContainer ***r_r_ic)
 {
@@ -38,11 +38,11 @@ void PathSplicingTopologyReader::LoadTopology(std::string fileName, int nSlices,
     std::list<std::pair<std::pair<int, int>, double> > links;
 
     std::ifstream fs;
-    fs.open(fileName.c_str());
+    fs.open(latencyFileName.c_str());
     std::string line;
 
     if (!fs.is_open ()) {
-        NS_LOG_WARN("Cannot open file " << fileName);
+        NS_LOG_WARN("Cannot open file " << latencyFileName);
         return;
     }
 
@@ -183,13 +183,6 @@ void PathSplicingTopologyReader::LoadTopology(std::string fileName, int nSlices,
         Ipv4InterfaceContainer ic = ipv4Helper.Assign((*r_h_ndc)[from]);
         (*r_h_ic)[from] = ic;
     }
-}
-
-void PathSplicingTopologyReader::LoadWeights(std::string filePrefix, int nSlices,
-        NodeContainer &routers, NodeContainer &hosts, NetDeviceContainer **r_h_ndc,
-        NetDeviceContainer ***r_r_ndc, Ipv4InterfaceContainer **r_h_ic, Ipv4InterfaceContainer ***r_r_ic)
-{
-
 }
 
 } /* namespace ns3 */

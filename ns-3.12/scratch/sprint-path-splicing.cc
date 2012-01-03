@@ -44,8 +44,7 @@ int main (int argc, char *argv[])
 
     PathSplicingTopologyReaderHelper readerHelper;
     Ptr<PathSplicingTopologyReader> reader = readerHelper.GetTopologyReader();
-    reader->LoadTopology(latencyFileName, 5, routers, hosts, &r_h_ndc, &r_r_ndc, &r_h_ic, &r_r_ic);
-    reader->LoadWeights(weightFilePrefix, 5, routers, hosts, &r_h_ndc, &r_r_ndc, &r_h_ic, &r_r_ic);
+    reader->Load(latencyFileName, weightFilePrefix, 5, routers, hosts, &r_h_ndc, &r_r_ndc, &r_h_ic, &r_r_ic);
 
     //fail links
     std::vector<std::string> links = split(failedLinksStr, ';');
