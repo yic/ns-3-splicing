@@ -11,6 +11,8 @@ using namespace ns3;
 
 int main (int argc, char *argv[])
 {
+    Config::SetDefault("ns3::DropTailQueue::MaxPackets", UintegerValue(1000));
+
     std::string failedLinksStr("");
     std::string latencyFileName("data/sprint/latency.orig");
     std::string weightFilePrefix("data/sprint/weight");
