@@ -35,18 +35,11 @@ int main (int argc, char *argv[])
     cmd.AddValue("FailedLinks", "Links to fail, e.g., use --FailedLinks=A-B;C-D to fail links A-B and C-D", failedLinksStr);
     cmd.Parse (argc, argv);
 
-    NodeContainer routers;
-    NodeContainer hosts;
-    NetDeviceContainer *r_h_ndc = NULL;
-    NetDeviceContainer **r_r_ndc = NULL;
-    Ipv4InterfaceContainer *r_h_ic = NULL;
-    Ipv4InterfaceContainer **r_r_ic = NULL;
-
     PathSplicingTopologyReaderHelper readerHelper;
-    Ptr<PathSplicingTopologyReader> reader = readerHelper.GetTopologyReader();
-    reader->Load(latencyFileName, weightFilePrefix, 5, routers, hosts, &r_h_ndc, &r_r_ndc, &r_h_ic, &r_r_ic);
-    reader->LoadServers(hosts);
-    reader->LoadClients(hosts, 5, 2, 5, 10);
+    Ptr<PathSplicingTopologyReader> reader = readerHelper.GetTopologyReader(latencyFileName);
+    reader->LoadPathSplicing(weightFilePrefix, 5);
+    reader->LoadServers();
+    reader->LoadClients(5, 2, 5, 10);
 
     //fail links
     std::vector<std::string> links = split(failedLinksStr, ';');
@@ -78,21 +71,6 @@ int main (int argc, char *argv[])
     /* run */
     Simulator::Run();
     Simulator::Destroy();
-
-    //delete arrays
-    int node_num = routers.GetN();
-
-    delete [] r_h_ndc;
-
-    for (int i = 0; i < node_num; i ++)
-        delete [] r_r_ndc[i];
-    delete [] r_r_ndc;
-
-    delete [] r_h_ic;
-
-    for (int i = 0; i < node_num; i ++)
-        delete [] r_r_ic[i];
-    delete [] r_r_ic;
 
     return 0;
 }

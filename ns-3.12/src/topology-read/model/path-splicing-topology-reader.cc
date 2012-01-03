@@ -28,18 +28,9 @@ TypeId PathSplicingTopologyReader::GetTypeId (void)
   return tid;
 }
 
-PathSplicingTopologyReader::PathSplicingTopologyReader()
-{
-}
-
-void PathSplicingTopologyReader::Load(std::string latencyFileName, std::string weightFilePrefix, int nSlices,
-        NodeContainer &routers, NodeContainer &hosts, NetDeviceContainer **r_h_ndc,
-        NetDeviceContainer ***r_r_ndc, Ipv4InterfaceContainer **r_h_ic, Ipv4InterfaceContainer ***r_r_ic)
+PathSplicingTopologyReader::PathSplicingTopologyReader(std::string latencyFileName)
 {
     /* read topology */
-    std::vector<int> nodes;
-    std::list<std::pair<std::pair<int, int>, double> > links;
-
     std::ifstream fs;
     fs.open(latencyFileName.c_str());
     std::string line;
@@ -60,35 +51,35 @@ void PathSplicingTopologyReader::Load(std::string latencyFileName, std::string w
             int count = sscanf(line.c_str(), "%d %d %lf", &from, &to, &latency);
             NS_ASSERT(count == 3);
 
-            nodes.push_back(from);
-            nodes.push_back(to);
-            links.push_back(std::make_pair(std::make_pair(from, to), latency));
+            m_nodes.push_back(from);
+            m_nodes.push_back(to);
+            m_links.push_back(std::make_pair(std::make_pair(from, to), latency));
         }
     }
 
     fs.close();
 
-    std::sort(nodes.begin(), nodes.end());
-    nodes.erase(std::unique(nodes.begin(), nodes.end()), nodes.end());
-    NS_LOG_INFO("Number of nodes: " << nodes.size() << ", Number of links: " << links.size());
+    std::sort(m_nodes.begin(), m_nodes.end());
+    m_nodes.erase(std::unique(m_nodes.begin(), m_nodes.end()), m_nodes.end());
+    NS_LOG_INFO("Number of nodes: " << m_nodes.size() << ", Number of links: " << m_links.size());
 
     /* initiate containers */
-    int node_num = nodes.size();
+    uint32_t node_num = m_nodes.size();
 
-    routers.Create(node_num);
-    hosts.Create(node_num);
+    m_routers.Create(node_num);
+    m_hosts.Create(node_num);
 
-    *r_h_ndc = new NetDeviceContainer[node_num];
+    m_r_h_ndc = new NetDeviceContainer[node_num];
 
-    *r_r_ndc = new NetDeviceContainer *[node_num];
-    for (int i = 0; i < node_num; i ++)
-        (*r_r_ndc)[i] = new NetDeviceContainer[node_num];
+    m_r_r_ndc = new NetDeviceContainer *[node_num];
+    for (uint32_t i = 0; i < node_num; i ++)
+        m_r_r_ndc[i] = new NetDeviceContainer[node_num];
 
-    *r_h_ic = new Ipv4InterfaceContainer[node_num];
+    m_r_h_ic = new Ipv4InterfaceContainer[node_num];
 
-    *r_r_ic = new Ipv4InterfaceContainer *[node_num];
-    for (int i = 0; i < node_num; i ++)
-        (*r_r_ic)[i] = new Ipv4InterfaceContainer[node_num];
+    m_r_r_ic = new Ipv4InterfaceContainer *[node_num];
+    for (uint32_t i = 0; i < node_num; i ++)
+        m_r_r_ic[i] = new Ipv4InterfaceContainer[node_num];
 
     /* create links */
     PointToPointHelper p2pHelper;
@@ -96,7 +87,8 @@ void PathSplicingTopologyReader::Load(std::string latencyFileName, std::string w
 
     //router-to-router links
     std::list<std::pair<std::pair<int, int>, double> >::iterator link_it;
-    for (link_it = links.begin(); link_it != links.end(); link_it ++)
+
+    for (link_it = m_links.begin(); link_it != m_links.end(); link_it ++)
     {
         from = (*link_it).first.first;
         to = (*link_it).first.second;
@@ -104,39 +96,56 @@ void PathSplicingTopologyReader::Load(std::string latencyFileName, std::string w
         ss.str("");
         ss << latency << "ms";
 
-        NodeContainer nc = NodeContainer(routers.Get(from), routers.Get(to));
+        NodeContainer nc = NodeContainer(m_routers.Get(from), m_routers.Get(to));
         p2pHelper.SetDeviceAttribute("DataRate", StringValue("100Mbps"));
         p2pHelper.SetChannelAttribute("Delay", StringValue(ss.str()));
-        NetDeviceContainer ndc = p2pHelper.Install(nc);
-        (*r_r_ndc)[from][to] = ndc;
+        m_r_r_ndc[from][to] = p2pHelper.Install(nc);
     }
 
     //router-to-host links
-    std::vector<int>::iterator node_it;
-    for (node_it = nodes.begin(); node_it != nodes.end(); node_it ++)
+    for (uint32_t i = 0; i < node_num; i ++)
     {
-        from = *node_it;
-        NodeContainer nc = NodeContainer(routers.Get(from), hosts.Get(from));
+        NodeContainer nc = NodeContainer(m_routers.Get(i), m_hosts.Get(i));
         p2pHelper.SetDeviceAttribute("DataRate", StringValue("1000Mbps"));
         p2pHelper.SetChannelAttribute("Delay", StringValue("0.1ms"));
-        NetDeviceContainer ndc = p2pHelper.Install(nc);
-        (*r_h_ndc)[from] = ndc;
+        m_r_h_ndc[i] = p2pHelper.Install(nc);
     }
+}
 
+PathSplicingTopologyReader::~PathSplicingTopologyReader()
+{
+    delete [] m_r_h_ndc;
+
+    for (uint32_t i = 0; i < m_nodes.size(); i ++)
+        delete [] m_r_r_ndc[i];
+    delete [] m_r_r_ndc;
+
+    delete [] m_r_h_ic;
+
+    for (uint32_t i = 0; i < m_nodes.size(); i ++)
+        delete [] m_r_r_ic[i];
+    delete [] m_r_r_ic;
+}
+
+void PathSplicingTopologyReader::LoadPathSplicing(std::string weightFilePrefix, int nSlices)
+{
     /* install Internet stack */
     Ipv4PathSplicingRoutingHelper splicingHelper;
     splicingHelper.SetNSlices(nSlices);
     InternetStackHelper internetHelper;
     internetHelper.SetRoutingHelper(splicingHelper);
-    internetHelper.Install(routers);
-    internetHelper.Install(hosts);
+    internetHelper.Install(m_routers);
+    internetHelper.Install(m_hosts);
 
     /* assign IP addresses */
     Ipv4AddressHelper ipv4Helper;
+    std::stringstream ss;
+    int first, second, third, from, to;
 
-    int first, second, third;
     //router-to-router links
-    for (link_it = links.begin(); link_it != links.end(); link_it ++)
+    std::list<std::pair<std::pair<int, int>, double> >::iterator link_it;
+
+    for (link_it = m_links.begin(); link_it != m_links.end(); link_it ++)
     {
         from = (*link_it).first.first;
         to = (*link_it).first.second;
@@ -159,19 +168,16 @@ void PathSplicingTopologyReader::Load(std::string latencyFileName, std::string w
         ss << first << "." << second << "." << third << ".0";
 
         ipv4Helper.SetBase(ss.str().c_str(), "255.255.255.0");
-        NS_ASSERT((*r_r_ndc)[from][to].GetN() == 2);
-        Ipv4InterfaceContainer ic = ipv4Helper.Assign((*r_r_ndc)[from][to]);
-        (*r_r_ic)[from][to] = ic;
+        NS_ASSERT(m_r_r_ndc[from][to].GetN() == 2);
+        m_r_r_ic[from][to] = ipv4Helper.Assign(m_r_r_ndc[from][to]);
     }
 
     //router-to-host links
-    for (node_it = nodes.begin(); node_it != nodes.end(); node_it ++)
+    for (uint32_t i = 0; i < m_nodes.size(); i ++)
     {
-        from = *node_it;
-
         first = 192;
         second = 168;
-        third = from;
+        third = i;
 
         while (third > 255) {
             second += 1;
@@ -182,9 +188,8 @@ void PathSplicingTopologyReader::Load(std::string latencyFileName, std::string w
         ss << first << "." << second << "." << third << ".0";
 
         ipv4Helper.SetBase(ss.str().c_str(), "255.255.255.0");
-        NS_ASSERT((*r_h_ndc)[from].GetN() == 2);
-        Ipv4InterfaceContainer ic = ipv4Helper.Assign((*r_h_ndc)[from]);
-        (*r_h_ic)[from] = ic;
+        NS_ASSERT(m_r_h_ndc[i].GetN() == 2);
+        m_r_h_ic[i] = ipv4Helper.Assign(m_r_h_ndc[i]);
     }
 
     /* configure link weights */
@@ -194,6 +199,9 @@ void PathSplicingTopologyReader::Load(std::string latencyFileName, std::string w
     //default slice
     ss.str("");
     ss << weightFilePrefix << ".orig";
+
+    std::ifstream fs;
+    std::string line;
 
     fs.open(ss.str().c_str());
 
@@ -209,9 +217,9 @@ void PathSplicingTopologyReader::Load(std::string latencyFileName, std::string w
         if (line.length() > 0) {
             int count = sscanf(line.c_str(), "%d %d %d", &from, &to, &weight);
             NS_ASSERT(count == 3);
-            NS_ASSERT((*r_r_ic)[from][to].GetN() == 2);
-            splicingHelper.SetMetric(0, routers.Get(from)->GetId(), (*r_r_ic)[from][to].Get(0).second, weight);
-            splicingHelper.SetMetric(0, routers.Get(to)->GetId(), (*r_r_ic)[from][to].Get(1).second, weight);
+            NS_ASSERT(m_r_r_ic[from][to].GetN() == 2);
+            splicingHelper.SetMetric(0, m_routers.Get(from)->GetId(), m_r_r_ic[from][to].Get(0).second, weight);
+            splicingHelper.SetMetric(0, m_routers.Get(to)->GetId(), m_r_r_ic[from][to].Get(1).second, weight);
         }
     }
 
@@ -236,9 +244,9 @@ void PathSplicingTopologyReader::Load(std::string latencyFileName, std::string w
             if (line.length() > 0) {
                 int count = sscanf(line.c_str(), "%d %d %d", &from, &to, &weight);
                 NS_ASSERT(count == 3);
-                NS_ASSERT((*r_r_ic)[from][to].GetN() == 2);
-                splicingHelper.SetMetric(i, routers.Get(from)->GetId(), (*r_r_ic)[from][to].Get(0).second, weight);
-                splicingHelper.SetMetric(i, routers.Get(to)->GetId(), (*r_r_ic)[from][to].Get(1).second, weight);
+                NS_ASSERT(m_r_r_ic[from][to].GetN() == 2);
+                splicingHelper.SetMetric(i, m_routers.Get(from)->GetId(), m_r_r_ic[from][to].Get(0).second, weight);
+                splicingHelper.SetMetric(i, m_routers.Get(to)->GetId(), m_r_r_ic[from][to].Get(1).second, weight);
             }
         }
 
@@ -246,35 +254,34 @@ void PathSplicingTopologyReader::Load(std::string latencyFileName, std::string w
     }
 
     //router-to-host links
-    for (node_it = nodes.begin(); node_it != nodes.end(); node_it ++) {
-        from = *node_it;
-        NS_ASSERT((*r_h_ic)[from].GetN() == 2);
+    for (uint32_t i = 0; i < m_nodes.size(); i ++) {
+        NS_ASSERT(m_r_h_ic[i].GetN() == 2);
 
-        for (int i = 0; i < nSlices; i ++) {
-            splicingHelper.SetMetric(i, routers.Get(from)->GetId(), (*r_h_ic)[from].Get(0).second, 1);
-            splicingHelper.SetMetric(i, hosts.Get(from)->GetId(), (*r_h_ic)[from].Get(1).second, 1);
+        for (int j = 0; j < nSlices; j ++) {
+            splicingHelper.SetMetric(j, m_routers.Get(i)->GetId(), m_r_h_ic[i].Get(0).second, 1);
+            splicingHelper.SetMetric(j, m_hosts.Get(i)->GetId(), m_r_h_ic[i].Get(1).second, 1);
         }
     }
 
     splicingHelper.PopulateAllRoutingTables();
 }
 
-void PathSplicingTopologyReader::LoadServers(NodeContainer &hosts, double startTime, double stopTime, uint32_t portNumber)
+void PathSplicingTopologyReader::LoadServers(double startTime, double stopTime, uint32_t portNumber)
 {
     PathSplicingAppServerHelper serverHelper(portNumber);
 
-    for (uint32_t i = 0; i < hosts.GetN(); i ++) {
-        ApplicationContainer ac = serverHelper.Install(hosts.Get(i));
+    for (uint32_t i = 0; i < m_hosts.GetN(); i ++) {
+        ApplicationContainer ac = serverHelper.Install(m_hosts.Get(i));
         ac.Start(Seconds(startTime));
         ac.Stop(Seconds(stopTime));
     }
 }
 
-void PathSplicingTopologyReader::LoadClients(NodeContainer &hosts, uint32_t maxSlices, uint32_t maxCount, uint32_t maxRetx, double packetInterval,
-        double startTime, double stopTime, uint32_t packetSize, uint32_t portNumber)
+void PathSplicingTopologyReader::LoadClients(uint32_t maxSlices, uint32_t maxCount, uint32_t maxRetx,
+        double packetInterval, double startTime, double stopTime, uint32_t packetSize, uint32_t portNumber)
 {
-    for (uint32_t i = 0; i < hosts.GetN(); i ++) {
-        Ptr<Ipv4> ipv4 = hosts.Get(i)->GetObject<Ipv4>();
+    for (uint32_t i = 0; i < m_hosts.GetN(); i ++) {
+        Ptr<Ipv4> ipv4 = m_hosts.Get(i)->GetObject<Ipv4>();
         PathSplicingAppClientHelper clientHelper(ipv4->GetAddress(1, 0).GetLocal(), portNumber);
 
         clientHelper.SetAttribute("MaxSlices", UintegerValue(maxSlices));
@@ -283,9 +290,9 @@ void PathSplicingTopologyReader::LoadClients(NodeContainer &hosts, uint32_t maxS
         clientHelper.SetAttribute("Interval", TimeValue(Seconds(packetInterval)));
         clientHelper.SetAttribute("PacketSize", UintegerValue(packetSize));
 
-        for (uint32_t j = 0; j < hosts.GetN(); j ++) {
+        for (uint32_t j = 0; j < m_hosts.GetN(); j ++) {
             if (i != j) {
-                ApplicationContainer ac = clientHelper.Install(hosts.Get(j));
+                ApplicationContainer ac = clientHelper.Install(m_hosts.Get(j));
                 ac.Start(Seconds(startTime));
                 ac.Stop(Seconds(stopTime));
             }

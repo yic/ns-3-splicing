@@ -10,9 +10,9 @@ PathSplicingTopologyReaderHelper::PathSplicingTopologyReaderHelper()
     m_reader = 0;
 }
 
-Ptr<PathSplicingTopologyReader> PathSplicingTopologyReaderHelper::GetTopologyReader()
+Ptr<PathSplicingTopologyReader> PathSplicingTopologyReaderHelper::GetTopologyReader(std::string latencyFileName)
 {
-    m_reader = CreateObject<PathSplicingTopologyReader>();
+    m_reader = CreateObject<PathSplicingTopologyReader>(latencyFileName);
     return m_reader;
 }
 
