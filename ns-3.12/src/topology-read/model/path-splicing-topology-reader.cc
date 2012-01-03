@@ -6,6 +6,7 @@
 
 #include "ns3/string.h"
 #include "ns3/uinteger.h"
+#include "ns3/random-variable.h"
 
 #include "ns3/log.h"
 #include "ns3/point-to-point-helper.h"
@@ -145,8 +146,7 @@ void PathSplicingTopologyReader::LoadPathSplicing(std::string weightFilePrefix, 
     //router-to-router links
     std::list<std::pair<std::pair<int, int>, double> >::iterator link_it;
 
-    for (link_it = m_links.begin(); link_it != m_links.end(); link_it ++)
-    {
+    for (link_it = m_links.begin(); link_it != m_links.end(); link_it ++) {
         from = (*link_it).first.first;
         to = (*link_it).first.second;
 
@@ -296,6 +296,72 @@ void PathSplicingTopologyReader::LoadClients(uint32_t maxSlices, uint32_t maxCou
                 ac.Start(Seconds(startTime));
                 ac.Stop(Seconds(stopTime));
             }
+        }
+    }
+}
+
+std::vector<std::string> &PathSplicingTopologyReader::split(const std::string &s, char delim, std::vector<std::string> &elems)
+{
+    std::stringstream ss(s);
+    std::string item;
+
+    while(std::getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+
+    return elems;
+}
+
+std::vector<std::string> PathSplicingTopologyReader::split(const std::string &s, char delim)
+{
+    std::vector<std::string> elems;
+    return split(s, delim, elems);
+}
+
+void PathSplicingTopologyReader::LoadFailures(std::string failedLinksStr, double time)
+{
+    std::vector<std::string> links = split(failedLinksStr, ';');
+
+    for (std::vector<std::string>::iterator link_it = links.begin(); link_it != links.end(); link_it ++) {
+        std::vector<std::string> ends = split(*link_it, '-');
+
+        if (ends.size() != 2) {
+            NS_LOG_UNCOND("wrong link format: " << *link_it);
+            continue;
+        }
+
+        int end0 = atoi(ends[0].c_str());
+        int end1 = atoi(ends[1].c_str());
+
+        if (end0 > end1) {
+            int tmp = end0;
+            end0 = end1;
+            end1 = tmp;
+        }
+
+        NS_LOG_UNCOND("Fail link " << end0 << "-" << end1);
+        //schedule link failures
+        NS_ASSERT(m_r_r_ic[end0][end1].GetN() == 2);
+        Simulator::Schedule(Seconds(time), &Ipv4::SetDown, m_r_r_ic[end0][end1].Get(0).first, m_r_r_ic[end0][end1].Get(0).second);
+        Simulator::Schedule(Seconds(time), &Ipv4::SetDown, m_r_r_ic[end0][end1].Get(1).first, m_r_r_ic[end0][end1].Get(1).second);
+    }
+}
+
+void PathSplicingTopologyReader::GenerateRandomFailures(double probability, double time)
+{
+    UniformVariable rand;
+    int from, to;
+    std::list<std::pair<std::pair<int, int>, double> >::iterator link_it;
+
+    for (link_it = m_links.begin(); link_it != m_links.end(); link_it ++) {
+        if (rand.GetValue() < probability) {
+            from = (*link_it).first.first;
+            to = (*link_it).first.second;
+            NS_LOG_UNCOND("Fail link " << from << "-" << to);
+
+            NS_ASSERT(m_r_r_ic[from][to].GetN() == 2);
+            Simulator::Schedule(Seconds(time), &Ipv4::SetDown, m_r_r_ic[from][to].Get(0).first, m_r_r_ic[from][to].Get(0).second);
+            Simulator::Schedule(Seconds(time), &Ipv4::SetDown, m_r_r_ic[from][to].Get(1).first, m_r_r_ic[from][to].Get(1).second);
         }
     }
 }

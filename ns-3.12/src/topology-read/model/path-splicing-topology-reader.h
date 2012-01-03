@@ -20,6 +20,8 @@ public:
     void LoadServers(double startTime = 1.0, double stopTime = 100.0, uint32_t portNumber = 9);
     void LoadClients(uint32_t maxSlices, uint32_t maxCount, uint32_t maxRetx, double packetInterval,
             double startTime = 1.0, double stopTime = 100.0, uint32_t packetSize = 1024, uint32_t portNumber = 9);
+    void LoadFailures(std::string failedLinksStr, double time = 8.0);
+    void GenerateRandomFailures(double probability, double time = 8.0);
 private:
     NodeContainer m_routers;
     NodeContainer m_hosts;
@@ -31,6 +33,9 @@ private:
     NetDeviceContainer **m_r_r_ndc;
     Ipv4InterfaceContainer *m_r_h_ic;
     Ipv4InterfaceContainer **m_r_r_ic;
+
+    std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems);
+    std::vector<std::string> split(const std::string &s, char delim);
 };
 
 }; // end namespace ns3
