@@ -51,7 +51,7 @@ TypeId PathSplicingAppClient::GetTypeId(void)
                 UintegerValue(1),
                 MakeUintegerAccessor(&PathSplicingAppClient::m_maxSlices),
                 MakeUintegerChecker<uint32_t>())
-        .AddAttribute ("MaxRetry",
+        .AddAttribute ("MaxRetx",
                 "The maximum number of retry for each request",
                 UintegerValue(5),
                 MakeUintegerAccessor(&PathSplicingAppClient::m_maxRetx),

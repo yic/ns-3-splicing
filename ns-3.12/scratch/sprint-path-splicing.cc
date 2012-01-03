@@ -28,8 +28,8 @@ std::vector<std::string> split(const std::string &s, char delim) {
 int main (int argc, char *argv[])
 {
     std::string failedLinksStr("");
-    std::string latencyFileName("scratch/sprint/latency.orig");
-    std::string weightFilePrefix("scratch/sprint/weight");
+    std::string latencyFileName("data/sprint/latency.orig");
+    std::string weightFilePrefix("data/sprint/weight");
 
     CommandLine cmd;
     cmd.AddValue("FailedLinks", "Links to fail, e.g., use --FailedLinks=A-B;C-D to fail links A-B and C-D", failedLinksStr);
@@ -45,6 +45,8 @@ int main (int argc, char *argv[])
     PathSplicingTopologyReaderHelper readerHelper;
     Ptr<PathSplicingTopologyReader> reader = readerHelper.GetTopologyReader();
     reader->Load(latencyFileName, weightFilePrefix, 5, routers, hosts, &r_h_ndc, &r_r_ndc, &r_h_ic, &r_r_ic);
+    reader->LoadServers(hosts);
+    reader->LoadClients(hosts, 5, 2, 5, 10);
 
     //fail links
     std::vector<std::string> links = split(failedLinksStr, ';');
@@ -72,6 +74,10 @@ int main (int argc, char *argv[])
 //      Simulator::Schedule(Seconds(8),&Ipv4::SetDown, r_r_ic[end0][end1]->Get(0).first, r_r_ic[end0][end1]->Get(0).second);
 //      Simulator::Schedule(Seconds(8),&Ipv4::SetDown, r_r_ic[end0][end1]->Get(1).first, r_r_ic[end0][end1]->Get(1).second);
     }
+
+    /* run */
+    Simulator::Run();
+    Simulator::Destroy();
 
     //delete arrays
     int node_num = routers.GetN();

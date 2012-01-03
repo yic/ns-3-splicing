@@ -5,12 +5,15 @@
 #include <sstream>
 
 #include "ns3/string.h"
+#include "ns3/uinteger.h"
 
 #include "ns3/log.h"
 #include "ns3/point-to-point-helper.h"
 #include "ns3/ipv4-path-splicing-routing-helper.h"
 #include "ns3/internet-stack-helper.h"
 #include "ns3/ipv4-address-helper.h"
+#include "ns3/path-splicing-app-helper.h"
+#include "ns3/application-container.h"
 #include "path-splicing-topology-reader.h"
 
 namespace ns3 {
@@ -182,6 +185,111 @@ void PathSplicingTopologyReader::Load(std::string latencyFileName, std::string w
         NS_ASSERT((*r_h_ndc)[from].GetN() == 2);
         Ipv4InterfaceContainer ic = ipv4Helper.Assign((*r_h_ndc)[from]);
         (*r_h_ic)[from] = ic;
+    }
+
+    /* configure link weights */
+    int weight;
+
+    //router-to-router links
+    //default slice
+    ss.str("");
+    ss << weightFilePrefix << ".orig";
+
+    fs.open(ss.str().c_str());
+
+    if (!fs.is_open ()) {
+        NS_LOG_WARN("Cannot open file " << ss.str());
+        return;
+    }
+
+    while (!fs.eof()) {
+        line.clear();
+        getline(fs, line);
+
+        if (line.length() > 0) {
+            int count = sscanf(line.c_str(), "%d %d %d", &from, &to, &weight);
+            NS_ASSERT(count == 3);
+            NS_ASSERT((*r_r_ic)[from][to].GetN() == 2);
+            splicingHelper.SetMetric(0, routers.Get(from)->GetId(), (*r_r_ic)[from][to].Get(0).second, weight);
+            splicingHelper.SetMetric(0, routers.Get(to)->GetId(), (*r_r_ic)[from][to].Get(1).second, weight);
+        }
+    }
+
+    fs.close();
+
+    //other slices
+    for (int i = 1; i < nSlices; i ++) {
+        ss.str("");
+        ss << weightFilePrefix << "." << i;
+
+        fs.open(ss.str().c_str());
+
+        if (!fs.is_open ()) {
+            NS_LOG_WARN("Cannot open file " << ss.str());
+            return;
+        }
+
+        while (!fs.eof()) {
+            line.clear();
+            getline(fs, line);
+
+            if (line.length() > 0) {
+                int count = sscanf(line.c_str(), "%d %d %d", &from, &to, &weight);
+                NS_ASSERT(count == 3);
+                NS_ASSERT((*r_r_ic)[from][to].GetN() == 2);
+                splicingHelper.SetMetric(i, routers.Get(from)->GetId(), (*r_r_ic)[from][to].Get(0).second, weight);
+                splicingHelper.SetMetric(i, routers.Get(to)->GetId(), (*r_r_ic)[from][to].Get(1).second, weight);
+            }
+        }
+
+        fs.close();
+    }
+
+    //router-to-host links
+    for (node_it = nodes.begin(); node_it != nodes.end(); node_it ++) {
+        from = *node_it;
+        NS_ASSERT((*r_h_ic)[from].GetN() == 2);
+
+        for (int i = 0; i < nSlices; i ++) {
+            splicingHelper.SetMetric(i, routers.Get(from)->GetId(), (*r_h_ic)[from].Get(0).second, 1);
+            splicingHelper.SetMetric(i, hosts.Get(from)->GetId(), (*r_h_ic)[from].Get(1).second, 1);
+        }
+    }
+
+    splicingHelper.PopulateAllRoutingTables();
+}
+
+void PathSplicingTopologyReader::LoadServers(NodeContainer &hosts, double startTime, double stopTime, uint32_t portNumber)
+{
+    PathSplicingAppServerHelper serverHelper(portNumber);
+
+    for (uint32_t i = 0; i < hosts.GetN(); i ++) {
+        ApplicationContainer ac = serverHelper.Install(hosts.Get(i));
+        ac.Start(Seconds(startTime));
+        ac.Stop(Seconds(stopTime));
+    }
+}
+
+void PathSplicingTopologyReader::LoadClients(NodeContainer &hosts, uint32_t maxSlices, uint32_t maxCount, uint32_t maxRetx, double packetInterval,
+        double startTime, double stopTime, uint32_t packetSize, uint32_t portNumber)
+{
+    for (uint32_t i = 0; i < hosts.GetN(); i ++) {
+        Ptr<Ipv4> ipv4 = hosts.Get(i)->GetObject<Ipv4>();
+        PathSplicingAppClientHelper clientHelper(ipv4->GetAddress(1, 0).GetLocal(), portNumber);
+
+        clientHelper.SetAttribute("MaxSlices", UintegerValue(maxSlices));
+        clientHelper.SetAttribute("MaxPackets", UintegerValue(maxCount));
+        clientHelper.SetAttribute("MaxRetx", UintegerValue(maxRetx));
+        clientHelper.SetAttribute("Interval", TimeValue(Seconds(packetInterval)));
+        clientHelper.SetAttribute("PacketSize", UintegerValue(packetSize));
+
+        for (uint32_t j = 0; j < hosts.GetN(); j ++) {
+            if (i != j) {
+                ApplicationContainer ac = clientHelper.Install(hosts.Get(j));
+                ac.Start(Seconds(startTime));
+                ac.Stop(Seconds(stopTime));
+            }
+        }
     }
 }
 
