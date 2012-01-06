@@ -58,6 +58,7 @@ void PathSplicingPathTag::Serialize(TagBuffer i) const
 
     bool highOrder = true;
     uint8_t number, sliceIndex;
+    number = 0;
 
     for (std::list<int>::const_iterator it = m_sliceIndices.begin(); it != m_sliceIndices.end(); it ++)
     {

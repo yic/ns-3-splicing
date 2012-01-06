@@ -43,13 +43,14 @@ PathSplicingTopologyReader::PathSplicingTopologyReader(std::string latencyFileNa
 
     int from, to;
     double latency;
+    int count;
 
     while (!fs.eof()) {
         line.clear();
         getline(fs, line);
 
         if (line.length() > 0) {
-            int count = sscanf(line.c_str(), "%d %d %lf", &from, &to, &latency);
+            count = sscanf(line.c_str(), "%d %d %lf", &from, &to, &latency);
             NS_ASSERT(count == 3);
 
             m_nodes.push_back(from);
@@ -210,12 +211,14 @@ void PathSplicingTopologyReader::LoadPathSplicing(std::string weightFilePrefix, 
         return;
     }
 
+    int count;
+
     while (!fs.eof()) {
         line.clear();
         getline(fs, line);
 
         if (line.length() > 0) {
-            int count = sscanf(line.c_str(), "%d %d %d", &from, &to, &weight);
+            count = sscanf(line.c_str(), "%d %d %d", &from, &to, &weight);
             NS_ASSERT(count == 3);
             NS_ASSERT(m_r_r_ic[from][to].GetN() == 2);
             splicingHelper.SetMetric(0, m_routers.Get(from)->GetId(), m_r_r_ic[from][to].Get(0).second, weight);
@@ -242,7 +245,7 @@ void PathSplicingTopologyReader::LoadPathSplicing(std::string weightFilePrefix, 
             getline(fs, line);
 
             if (line.length() > 0) {
-                int count = sscanf(line.c_str(), "%d %d %d", &from, &to, &weight);
+                count = sscanf(line.c_str(), "%d %d %d", &from, &to, &weight);
                 NS_ASSERT(count == 3);
                 NS_ASSERT(m_r_r_ic[from][to].GetN() == 2);
                 splicingHelper.SetMetric(i, m_routers.Get(from)->GetId(), m_r_r_ic[from][to].Get(0).second, weight);
