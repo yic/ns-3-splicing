@@ -28,10 +28,10 @@ int main (int argc, char *argv[])
     uint32_t nRequestSize = 1024;
     uint32_t nResponseSize = 1024;
 
+    double failureProbability = 0.0;
     double linkFailTime = 8.0;
 
     CommandLine cmd;
-    cmd.AddValue("FailedLinks", "Links to fail, e.g., use --FailedLinks=A-B;C-D to fail links A-B and C-D", failedLinksStr);
     cmd.AddValue("LatencyFile", "Path to the latency file", latencyFileName);
     cmd.AddValue("WeightFilePrefix", "Prefix of the weight files", weightFilePrefix);
     cmd.AddValue("SliceNumber", "Number of slices to use for path splicing, default is 5", nSlices);
@@ -43,6 +43,8 @@ int main (int argc, char *argv[])
     cmd.AddValue("AppPort", "Port number the application server uses, default is 9", nAppPort);
     cmd.AddValue("RequestSize", "Size of request, default is 1024", nRequestSize);
     cmd.AddValue("ResponseSize", "Size of response, default is 1024", nResponseSize);
+    cmd.AddValue("FailedLinks", "Links to fail, e.g., use --FailedLinks=A-B;C-D to fail links A-B and C-D", failedLinksStr);
+    cmd.AddValue("FailureProbability", "Probability of random link failures, valid only when FailedLinks is not specified", failureProbability);
     cmd.AddValue("LinkFailTime", "Link fail time in seconds, default is 8.0", linkFailTime);
     cmd.Parse (argc, argv);
 
@@ -51,7 +53,11 @@ int main (int argc, char *argv[])
     reader->LoadPathSplicing(weightFilePrefix, nSlices);
     reader->LoadServers(appStartTime, appStopTime, nAppPort, nResponseSize);
     reader->LoadClients(nSlices, nPackets, nRetx, packetInterval, appStartTime, appStopTime, nAppPort, nRequestSize);
-    reader->LoadFailures(failedLinksStr, linkFailTime);
+
+    if (failedLinksStr.size() > 0)
+        reader->LoadFailures(failedLinksStr, linkFailTime);
+    else if (failureProbability > 0)
+        reader->GenerateRandomFailures(failureProbability, linkFailTime);
 
     /* run */
     Simulator::Run();
