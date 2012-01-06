@@ -269,19 +269,20 @@ void PathSplicingTopologyReader::LoadPathSplicing(std::string weightFilePrefix, 
     splicingHelper.PopulateAllRoutingTables();
 }
 
-void PathSplicingTopologyReader::LoadServers(double startTime, double stopTime, uint32_t portNumber)
+void PathSplicingTopologyReader::LoadServers(double startTime, double stopTime, uint32_t portNumber, uint32_t packetSize)
 {
     PathSplicingAppServerHelper serverHelper(portNumber);
 
     for (uint32_t i = 0; i < m_hosts.GetN(); i ++) {
         ApplicationContainer ac = serverHelper.Install(m_hosts.Get(i));
+        serverHelper.SetAttribute("PacketSize", UintegerValue(packetSize));
         ac.Start(Seconds(startTime));
         ac.Stop(Seconds(stopTime));
     }
 }
 
 void PathSplicingTopologyReader::LoadClients(uint32_t maxSlices, uint32_t maxCount, uint32_t maxRetx,
-        double packetInterval, double startTime, double stopTime, uint32_t packetSize, uint32_t portNumber)
+        double packetInterval, double startTime, double stopTime, uint32_t portNumber, uint32_t packetSize)
 {
     for (uint32_t i = 0; i < m_hosts.GetN(); i ++) {
         Ptr<Ipv4> ipv4 = m_hosts.Get(i)->GetObject<Ipv4>();

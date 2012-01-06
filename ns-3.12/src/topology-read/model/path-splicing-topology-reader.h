@@ -17,11 +17,11 @@ public:
     virtual ~PathSplicingTopologyReader();
 
     void LoadPathSplicing(std::string weightFilePrefix, int nSlices);
-    void LoadServers(double startTime = 1.0, double stopTime = 100.0, uint32_t portNumber = 9);
+    void LoadServers(double startTime, double stopTime, uint32_t portNumber, uint32_t packetSize);
     void LoadClients(uint32_t maxSlices, uint32_t maxCount, uint32_t maxRetx, double packetInterval,
-            double startTime = 1.0, double stopTime = 100.0, uint32_t packetSize = 1024, uint32_t portNumber = 9);
-    void LoadFailures(std::string failedLinksStr, double time = 8.0);
-    void GenerateRandomFailures(double probability, double time = 8.0);
+            double startTime, double stopTime, uint32_t portNumber, uint32_t packetSize);
+    void LoadFailures(std::string failedLinksStr, double time);
+    void GenerateRandomFailures(double probability, double time);
 private:
     NodeContainer m_routers;
     NodeContainer m_hosts;
