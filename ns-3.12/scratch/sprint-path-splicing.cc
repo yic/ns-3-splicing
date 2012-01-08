@@ -46,7 +46,7 @@ int main (int argc, char *argv[])
     cmd.AddValue("FailedLinks", "Links to fail, e.g., use --FailedLinks=A-B;C-D to fail links A-B and C-D", failedLinksStr);
     cmd.AddValue("FailureProbability", "Probability of random link failures, valid only when FailedLinks is not specified", failureProbability);
     cmd.AddValue("LinkFailTime", "Link fail time in seconds, default is 8.0", linkFailTime);
-    cmd.Parse (argc, argv);
+    cmd.Parse(argc, argv);
 
     PathSplicingTopologyReaderHelper readerHelper;
     Ptr<PathSplicingTopologyReader> reader = readerHelper.GetTopologyReader(latencyFileName);
