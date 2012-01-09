@@ -213,6 +213,7 @@ void PathSplicingAppClient::Timeout(uint32_t serialNumber)
     {
         m_pendingRequests.erase(it);
         NS_LOG_INFO("Node " << GetNode()->GetId() << " give up request #" << serialNumber << " to " << m_peerAddress);
+        std::cout << "Node " << GetNode()->GetId() << " give up request #" << serialNumber << " to " << m_peerAddress;
     }
 }
 
@@ -253,6 +254,7 @@ void PathSplicingAppClient::HandleRead(Ptr<Socket> socket)
             //update srtt, rttvar, m_rto
             Time rtt = Simulator::Now() - entry->GetSendTime();
             NS_LOG_INFO("Node " << GetNode()->GetId() << " received reply #" << serialNumber << " from " << m_peerAddress << " after " << rtt);
+            std::cout << "Node " << GetNode()->GetId() << " received reply #" << serialNumber << " from " << m_peerAddress << " after " << rtt;
 
             if (entry->GetRetx() > 0)
             {
