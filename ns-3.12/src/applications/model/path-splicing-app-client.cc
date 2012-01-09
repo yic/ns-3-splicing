@@ -147,7 +147,7 @@ void PathSplicingAppClient::Send()
 
     //send packet
     m_socket->Send(p);
-    NS_LOG_INFO("Node " << GetNode()->GetId() << " send request #" << m_sent << " to " << m_peerAddress);
+//    NS_LOG_INFO("Node " << GetNode()->GetId() << " send request #" << m_sent << " to " << m_peerAddress);
 
     //schedule timeout
     EventId timeoutEvent = Simulator::Schedule(m_rto, &PathSplicingAppClient::Timeout, this, m_sent);
@@ -200,7 +200,7 @@ void PathSplicingAppClient::Timeout(uint32_t serialNumber)
 
         m_socket->Send(p);
         entry->IncrementRetx();
-        NS_LOG_INFO("Node " << GetNode()->GetId() << " retx request #" << serialNumber << "(" << entry->GetRetx() << ") to " << m_peerAddress);
+//        NS_LOG_INFO("Node " << GetNode()->GetId() << " retx request #" << serialNumber << "(" << entry->GetRetx() << ") to " << m_peerAddress);
 
         EventId timeoutEvent = Simulator::Schedule(m_rto, &PathSplicingAppClient::Timeout, this, serialNumber);
 
@@ -213,7 +213,6 @@ void PathSplicingAppClient::Timeout(uint32_t serialNumber)
     {
         m_pendingRequests.erase(it);
         NS_LOG_INFO("Node " << GetNode()->GetId() << " give up request #" << serialNumber << " to " << m_peerAddress);
-        std::cout << "Node " << GetNode()->GetId() << " give up request #" << serialNumber << " to " << m_peerAddress;
     }
 }
 
@@ -254,14 +253,13 @@ void PathSplicingAppClient::HandleRead(Ptr<Socket> socket)
             //update srtt, rttvar, m_rto
             Time rtt = Simulator::Now() - entry->GetSendTime();
             NS_LOG_INFO("Node " << GetNode()->GetId() << " received reply #" << serialNumber << " from " << m_peerAddress << " after " << rtt);
-            std::cout << "Node " << GetNode()->GetId() << " received reply #" << serialNumber << " from " << m_peerAddress << " after " << rtt;
 
             if (entry->GetRetx() > 0)
             {
                 if (m_rto < rtt)
                     m_rto = rtt;
 
-                NS_LOG_INFO("- rto = " << m_rto);
+//                NS_LOG_INFO("- rto = " << m_rto);
             }
             else
             {
@@ -272,7 +270,7 @@ void PathSplicingAppClient::HandleRead(Ptr<Socket> socket)
                     NS_ASSERT(m_rttvar.GetNanoSeconds() == 0);
                     m_rttvar = NanoSeconds(rtt.GetNanoSeconds() / 2);
                     m_srtt = rtt;
-                    NS_LOG_INFO("- srtt = "<< m_srtt << ", rttvar = " << m_rttvar);
+//                    NS_LOG_INFO("- srtt = "<< m_srtt << ", rttvar = " << m_rttvar);
                 }
                 else
                 {
@@ -280,12 +278,12 @@ void PathSplicingAppClient::HandleRead(Ptr<Socket> socket)
                             PATH_SPLICING_RTO_BETA * abs(m_srtt.GetNanoSeconds() - rtt.GetNanoSeconds()));
                     m_srtt = NanoSeconds((1 - PATH_SPLICING_RTO_ALPHA) * m_srtt.GetNanoSeconds() +
                             PATH_SPLICING_RTO_ALPHA * rtt.GetNanoSeconds());
-                    NS_LOG_INFO("srtt = "<< m_srtt << ", rttvar = " << m_rttvar);
+//                    NS_LOG_INFO("srtt = "<< m_srtt << ", rttvar = " << m_rttvar);
                 }
 
                 m_rto = NanoSeconds(m_srtt.GetNanoSeconds() + PATH_SPLICING_RTO_K * m_rttvar.GetNanoSeconds());
 
-                NS_LOG_INFO("rto = " << m_rto);
+//                NS_LOG_INFO("rto = " << m_rto);
             }
 
             //remove PIT entry
