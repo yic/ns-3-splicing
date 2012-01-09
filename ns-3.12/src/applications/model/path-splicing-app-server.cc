@@ -110,8 +110,8 @@ void PathSplicingAppServer::HandleRead(Ptr<Socket> socket)
             PathSplicingSerialTag serialTag;
             packet->PeekPacketTag(serialTag);
 
-            NS_LOG_INFO("Node " << GetNode()->GetId() << " receive request #" << serialTag.GetSerialNumber() << " from " <<
-                    InetSocketAddress::ConvertFrom(from).GetIpv4());
+//            NS_LOG_INFO("Node " << GetNode()->GetId() << " receive request #" << serialTag.GetSerialNumber() << " from " <<
+//                    InetSocketAddress::ConvertFrom(from).GetIpv4());
 
             PathSplicingReversePathTag reversePathTag;
             packet->PeekPacketTag(reversePathTag);

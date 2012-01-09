@@ -23,7 +23,7 @@ sub run {
 
     foreach my $i (0 .. $round - 1) {
         chdir("..") or die($!);
-        system("./build/optimized/scratch/sprint-path-splicing --FailureProbability=$probability --RngSeed=$seed > evaluation/$dir/result-$i-$seed 2>&1");
+        system("./build/debug/scratch/sprint-path-splicing --FailureProbability=$probability --RngSeed=$seed > evaluation/$dir/result-$i-$seed 2>&1");
         chdir("evaluation") or die($!);
     }
 }
