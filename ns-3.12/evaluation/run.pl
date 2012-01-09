@@ -19,9 +19,10 @@ sub print_usage {
 sub run {
     my $dir = "result-$slices-$probability";
     mkdir($dir);
-    my $seed = time();
+    my $seed;
 
     foreach my $i (0 .. $round - 1) {
+        $seed = time();
         chdir("..") or die($!);
         system("./build/debug/scratch/sprint-path-splicing --FailureProbability=$probability --RngSeed=$seed > evaluation/$dir/result-$i-$seed 2>&1");
         chdir("evaluation") or die($!);
