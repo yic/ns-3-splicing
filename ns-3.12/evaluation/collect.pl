@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-my $slices;
+my $slices, $retx;
 &print_usage;
 
 my @probabilities = (0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1);
@@ -10,17 +10,18 @@ foreach my $p (@probabilities) {
 }
 
 sub print_usage {
-    if (@ARGV != 1) {
-        print STDERR "Usage: $0 slices\n";
+    if (@ARGV != 2) {
+        print STDERR "Usage: $0 slices retx\n";
         exit(-1);
     }
 
     $slices = $ARGV[0];
+    $retx = $ARGV[1];
 }
 
 sub collect {
     my ($probability) = @_;
-    my $dir = "result-$slices-$probability";
+    my $dir = "result-$slices-$retx-$probability";
 
     if (-d $dir) {
         opendir(DIR, "$dir");
@@ -29,7 +30,7 @@ sub collect {
         $total_received = $total_giveup = 0;
 
         while (my $file = readdir(DIR)) {
-            if ($file =~ /^result-\d+-\d+$/) {
+            if ($file =~ /^result-\d+$/) {
                 $received = `grep "received reply #1" $dir\/$file | wc -l`;
                 $giveup = `grep "give up request #1" $dir\/$file | wc -l`;
 
@@ -46,7 +47,7 @@ sub collect {
             }
         }
 
-        print "$slices $probability $total_received $total_giveup\n";
+        print "$slices $retx $probability $total_received $total_giveup\n";
     }
     else {
         print STDERR "Directory $dir does not exist\n";
