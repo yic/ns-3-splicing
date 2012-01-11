@@ -252,7 +252,8 @@ void PathSplicingAppClient::HandleRead(Ptr<Socket> socket)
 
             //update srtt, rttvar, m_rto
             Time rtt = Simulator::Now() - entry->GetSendTime();
-            NS_LOG_INFO("Node " << GetNode()->GetId() << " received reply #" << serialNumber << " from " << m_peerAddress << " after " << rtt);
+            NS_LOG_INFO("Node " << GetNode()->GetId() << " received reply #" << serialNumber << " from " << m_peerAddress <<
+                    " after " << rtt << " (retx=" << entry->GetRetx() << ")");
 
             if (entry->GetRetx() > 0)
             {
