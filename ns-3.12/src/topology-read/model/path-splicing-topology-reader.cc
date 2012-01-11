@@ -29,7 +29,7 @@ TypeId PathSplicingTopologyReader::GetTypeId (void)
   return tid;
 }
 
-PathSplicingTopologyReader::PathSplicingTopologyReader(std::string latencyFileName)
+PathSplicingTopologyReader::PathSplicingTopologyReader(std::string latencyFileName, uint32_t linkBandwidth)
 {
     /* read topology */
     std::ifstream fs;
@@ -85,7 +85,10 @@ PathSplicingTopologyReader::PathSplicingTopologyReader(std::string latencyFileNa
 
     /* create links */
     PointToPointHelper p2pHelper;
-    std::stringstream ss;
+    std::stringstream ssDelay, ssBandwidth;
+
+    ssBandwidth.str("");
+    ssBandwidth << linkBandwidth << "Mbps";
 
     //router-to-router links
     std::list<std::pair<std::pair<int, int>, double> >::iterator link_it;
@@ -95,12 +98,12 @@ PathSplicingTopologyReader::PathSplicingTopologyReader(std::string latencyFileNa
         from = (*link_it).first.first;
         to = (*link_it).first.second;
         latency = (*link_it).second;
-        ss.str("");
-        ss << latency << "ms";
+        ssDelay.str("");
+        ssDelay << latency << "ms";
 
         NodeContainer nc = NodeContainer(m_routers.Get(from), m_routers.Get(to));
-        p2pHelper.SetDeviceAttribute("DataRate", StringValue("100Mbps"));
-        p2pHelper.SetChannelAttribute("Delay", StringValue(ss.str()));
+        p2pHelper.SetDeviceAttribute("DataRate", StringValue(ssBandwidth.str()));
+        p2pHelper.SetChannelAttribute("Delay", StringValue(ssDelay.str()));
         m_r_r_ndc[from][to] = p2pHelper.Install(nc);
     }
 
@@ -108,7 +111,7 @@ PathSplicingTopologyReader::PathSplicingTopologyReader(std::string latencyFileNa
     for (uint32_t i = 0; i < node_num; i ++)
     {
         NodeContainer nc = NodeContainer(m_routers.Get(i), m_hosts.Get(i));
-        p2pHelper.SetDeviceAttribute("DataRate", StringValue("1000Mbps"));
+        p2pHelper.SetDeviceAttribute("DataRate", StringValue(ssBandwidth.str()));
         p2pHelper.SetChannelAttribute("Delay", StringValue("0.1ms"));
         m_r_h_ndc[i] = p2pHelper.Install(nc);
     }

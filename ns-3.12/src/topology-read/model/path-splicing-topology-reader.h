@@ -13,7 +13,7 @@ class PathSplicingTopologyReader : public Object
 public:
     static TypeId GetTypeId(void);
 
-    PathSplicingTopologyReader(std::string latencyFileName);
+    PathSplicingTopologyReader(std::string latencyFileName, uint32_t linkBandwidth);
     virtual ~PathSplicingTopologyReader();
 
     void LoadPathSplicing(std::string weightFilePrefix, int nSlices);

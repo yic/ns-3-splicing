@@ -9,7 +9,7 @@ class PathSplicingTopologyReaderHelper
 {
 public:
     PathSplicingTopologyReaderHelper();
-    Ptr<PathSplicingTopologyReader> GetTopologyReader(std::string latencyFileName);
+    Ptr<PathSplicingTopologyReader> GetTopologyReader(std::string latencyFileName, uint32_t linkBandwidth);
 
 private:
     Ptr<PathSplicingTopologyReader> m_reader;

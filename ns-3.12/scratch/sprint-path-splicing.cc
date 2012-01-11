@@ -17,6 +17,7 @@ int main (int argc, char *argv[])
     std::string latencyFileName("data/sprint/latency.orig");
     std::string weightFilePrefix("data/sprint/weight");
 
+    uint32_t linkBandwidth = 100;
     uint32_t nSlices = 5;
     uint32_t nPackets = 2;
     uint32_t nRetx = 5;
@@ -34,6 +35,7 @@ int main (int argc, char *argv[])
     CommandLine cmd;
     cmd.AddValue("LatencyFile", "Path to the latency file", latencyFileName);
     cmd.AddValue("WeightFilePrefix", "Prefix of the weight files", weightFilePrefix);
+    cmd.AddValue("LinkBandwidth", "Link Bandwidth in Mbps", linkBandwidth);
     cmd.AddValue("SliceNumber", "Number of slices to use for path splicing, default is 5", nSlices);
     cmd.AddValue("PacketNumber", "Number of requests to send, default is 2", nPackets);
     cmd.AddValue("RetxNumber", "Number of retx allowed, default is 5", nRetx);
@@ -49,7 +51,7 @@ int main (int argc, char *argv[])
     cmd.Parse(argc, argv);
 
     PathSplicingTopologyReaderHelper readerHelper;
-    Ptr<PathSplicingTopologyReader> reader = readerHelper.GetTopologyReader(latencyFileName);
+    Ptr<PathSplicingTopologyReader> reader = readerHelper.GetTopologyReader(latencyFileName, linkBandwidth);
     reader->LoadPathSplicing(weightFilePrefix, nSlices);
     reader->LoadServers(appStartTime, appStopTime, nAppPort, nResponseSize);
     reader->LoadClients(nSlices, nPackets, nRetx, packetInterval, appStartTime, appStopTime, nAppPort, nRequestSize);
