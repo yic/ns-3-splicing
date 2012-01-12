@@ -39,7 +39,6 @@ sub run {
         system("./build/debug/scratch/sprint-path-splicing --SliceNumber=$slices --RetxNumber=$retx --FailedLinks=\"$line\" --RngSeed=$seed >> evaluation/$dir/result-$i 2>&1");
         chdir("evaluation") or die($!);
         $i ++;
-        last;
     }
 
     close(FAILURE);
