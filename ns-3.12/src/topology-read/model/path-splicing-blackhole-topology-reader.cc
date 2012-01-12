@@ -10,26 +10,28 @@
 
 #include "ns3/log.h"
 #include "ns3/point-to-point-helper.h"
-#include "ns3/ipv4-path-splicing-routing-helper.h"
 #include "ns3/internet-stack-helper.h"
 #include "ns3/ipv4-address-helper.h"
 #include "ns3/path-splicing-app-helper.h"
 #include "ns3/application-container.h"
-#include "path-splicing-topology-reader.h"
+#include "path-splicing-blackhole-topology-reader.h"
 
 namespace ns3 {
 
-NS_LOG_COMPONENT_DEFINE("PathSplicingTopologyReader");
+NS_LOG_COMPONENT_DEFINE("PathSplicingBlackholeTopologyReader");
 
-TypeId PathSplicingTopologyReader::GetTypeId (void)
+TypeId PathSplicingBlackholeTopologyReader::GetTypeId (void)
 {
-  static TypeId tid = TypeId("ns3::PathSplicingTopologyReader")
+  static TypeId tid = TypeId("ns3::PathSplicingBlackholeTopologyReader")
     .SetParent<Object>()
   ;
   return tid;
 }
 
-PathSplicingTopologyReader::PathSplicingTopologyReader(std::string latencyFileName, uint32_t linkBandwidth)
+PathSplicingBlackholeTopologyReader::PathSplicingBlackholeTopologyReader(std::string latencyFileName, uint32_t linkBandwidth,
+        uint32_t victimId, uint32_t attackerId)
+    : m_victimId(victimId)
+    , m_attackerId(attackerId)
 {
     /* read topology */
     std::ifstream fs;
@@ -67,6 +69,10 @@ PathSplicingTopologyReader::PathSplicingTopologyReader(std::string latencyFileNa
 
     /* initiate containers */
     uint32_t node_num = m_nodes.size();
+
+    NS_ASSERT(m_victimId != m_attackerId);
+    NS_ASSERT(m_victimId < node_num);
+    NS_ASSERT(m_attackerId < node_num);
 
     m_routers.Create(node_num);
     m_hosts.Create(node_num);
@@ -115,9 +121,15 @@ PathSplicingTopologyReader::PathSplicingTopologyReader(std::string latencyFileNa
         p2pHelper.SetChannelAttribute("Delay", StringValue("0.1ms"));
         m_r_h_ndc[i] = p2pHelper.Install(nc);
     }
+
+    //attacker pseudo link
+    NodeContainer nc = NodeContainer(m_routers.Get(attackerId), m_hosts.Get(victimId));
+    p2pHelper.SetDeviceAttribute("DataRate", StringValue(ssBandwidth.str()));
+    p2pHelper.SetChannelAttribute("Delay", StringValue("0.1ms"));
+    m_a_v_ndc = p2pHelper.Install(nc);
 }
 
-PathSplicingTopologyReader::~PathSplicingTopologyReader()
+PathSplicingBlackholeTopologyReader::~PathSplicingBlackholeTopologyReader()
 {
     delete [] m_r_h_ndc;
 
@@ -132,13 +144,12 @@ PathSplicingTopologyReader::~PathSplicingTopologyReader()
     delete [] m_r_r_ic;
 }
 
-void PathSplicingTopologyReader::LoadPathSplicing(std::string weightFilePrefix, int nSlices)
+void PathSplicingBlackholeTopologyReader::LoadPathSplicing(std::string weightFilePrefix, int nSlices)
 {
     /* install Internet stack */
-    Ipv4PathSplicingRoutingHelper splicingHelper;
-    splicingHelper.SetNSlices(nSlices);
+    m_splicingHelper.SetNSlices(nSlices);
     InternetStackHelper internetHelper;
-    internetHelper.SetRoutingHelper(splicingHelper);
+    internetHelper.SetRoutingHelper(m_splicingHelper);
     internetHelper.Install(m_routers);
     internetHelper.Install(m_hosts);
 
@@ -196,6 +207,10 @@ void PathSplicingTopologyReader::LoadPathSplicing(std::string weightFilePrefix, 
         m_r_h_ic[i] = ipv4Helper.Assign(m_r_h_ndc[i]);
     }
 
+    //attacker-to-victim link
+    ipv4Helper.SetBase("172.16.0.0", "255.255.255.0");
+    m_a_v_ic = ipv4Helper.Assign(m_a_v_ndc);
+
     /* configure link weights */
     int weight;
 
@@ -224,8 +239,8 @@ void PathSplicingTopologyReader::LoadPathSplicing(std::string weightFilePrefix, 
             count = sscanf(line.c_str(), "%d %d %d", &from, &to, &weight);
             NS_ASSERT(count == 3);
             NS_ASSERT(m_r_r_ic[from][to].GetN() == 2);
-            splicingHelper.SetMetric(0, m_routers.Get(from)->GetId(), m_r_r_ic[from][to].Get(0).second, weight);
-            splicingHelper.SetMetric(0, m_routers.Get(to)->GetId(), m_r_r_ic[from][to].Get(1).second, weight);
+            m_splicingHelper.SetMetric(0, m_routers.Get(from)->GetId(), m_r_r_ic[from][to].Get(0).second, weight);
+            m_splicingHelper.SetMetric(0, m_routers.Get(to)->GetId(), m_r_r_ic[from][to].Get(1).second, weight);
         }
     }
 
@@ -251,8 +266,8 @@ void PathSplicingTopologyReader::LoadPathSplicing(std::string weightFilePrefix, 
                 count = sscanf(line.c_str(), "%d %d %d", &from, &to, &weight);
                 NS_ASSERT(count == 3);
                 NS_ASSERT(m_r_r_ic[from][to].GetN() == 2);
-                splicingHelper.SetMetric(i, m_routers.Get(from)->GetId(), m_r_r_ic[from][to].Get(0).second, weight);
-                splicingHelper.SetMetric(i, m_routers.Get(to)->GetId(), m_r_r_ic[from][to].Get(1).second, weight);
+                m_splicingHelper.SetMetric(i, m_routers.Get(from)->GetId(), m_r_r_ic[from][to].Get(0).second, weight);
+                m_splicingHelper.SetMetric(i, m_routers.Get(to)->GetId(), m_r_r_ic[from][to].Get(1).second, weight);
             }
         }
 
@@ -264,27 +279,34 @@ void PathSplicingTopologyReader::LoadPathSplicing(std::string weightFilePrefix, 
         NS_ASSERT(m_r_h_ic[i].GetN() == 2);
 
         for (int j = 0; j < nSlices; j ++) {
-            splicingHelper.SetMetric(j, m_routers.Get(i)->GetId(), m_r_h_ic[i].Get(0).second, 1);
-            splicingHelper.SetMetric(j, m_hosts.Get(i)->GetId(), m_r_h_ic[i].Get(1).second, 1);
+            m_splicingHelper.SetMetric(j, m_routers.Get(i)->GetId(), m_r_h_ic[i].Get(0).second, 1);
+            m_splicingHelper.SetMetric(j, m_hosts.Get(i)->GetId(), m_r_h_ic[i].Get(1).second, 1);
         }
     }
 
-    splicingHelper.PopulateAllRoutingTables();
+    //attacker-to-victim link
+    for (int j = 0; j < nSlices; j ++) {
+        m_splicingHelper.SetMetric(j, m_routers.Get(m_attackerId)->GetId(), m_a_v_ic.Get(0).second, 1);
+        m_splicingHelper.SetMetric(j, m_hosts.Get(m_victimId)->GetId(), m_a_v_ic.Get(1).second, 1);
+    }
+
+    m_a_v_ic.Get(0).first->SetDown(m_a_v_ic.Get(0).second);
+    m_a_v_ic.Get(1).first->SetDown(m_a_v_ic.Get(1).second);
+
+    m_splicingHelper.PopulateAllRoutingTables();
 }
 
-void PathSplicingTopologyReader::LoadServers(double startTime, double stopTime, uint32_t portNumber, uint32_t packetSize)
+void PathSplicingBlackholeTopologyReader::LoadServers(double startTime, double stopTime, uint32_t portNumber, uint32_t packetSize)
 {
     PathSplicingAppServerHelper serverHelper(portNumber);
 
-    for (uint32_t i = 0; i < m_hosts.GetN(); i ++) {
-        ApplicationContainer ac = serverHelper.Install(m_hosts.Get(i));
-        serverHelper.SetAttribute("PacketSize", UintegerValue(packetSize));
-        ac.Start(Seconds(startTime));
-        ac.Stop(Seconds(stopTime));
-    }
+    ApplicationContainer ac = serverHelper.Install(m_hosts.Get(m_victimId));
+    serverHelper.SetAttribute("PacketSize", UintegerValue(packetSize));
+    ac.Start(Seconds(startTime));
+    ac.Stop(Seconds(stopTime));
 }
 
-void PathSplicingTopologyReader::LoadClients(uint32_t maxSlices, uint32_t maxCount, uint32_t maxRetx,
+void PathSplicingBlackholeTopologyReader::LoadClients(uint32_t maxSlices, uint32_t maxCount, uint32_t maxRetx,
         double packetInterval, double startTime, double stopTime, uint32_t portNumber, uint32_t packetSize)
 {
     for (uint32_t i = 0; i < m_hosts.GetN(); i ++) {
@@ -307,70 +329,15 @@ void PathSplicingTopologyReader::LoadClients(uint32_t maxSlices, uint32_t maxCou
     }
 }
 
-std::vector<std::string> &PathSplicingTopologyReader::split(const std::string &s, char delim, std::vector<std::string> &elems)
+void PathSplicingBlackholeTopologyReader::StartHijackingAt(uint32_t time)
 {
-    std::stringstream ss(s);
-    std::string item;
+    Simulator::Schedule(Seconds(time - 0.1), &Ipv4::SetUp, m_a_v_ic.Get(0).first, m_a_v_ic.Get(0).second);
+    Simulator::Schedule(Seconds(time - 0.1), &Ipv4::SetUp, m_a_v_ic.Get(1).first, m_a_v_ic.Get(1).second);
 
-    while(std::getline(ss, item, delim)) {
-        elems.push_back(item);
-    }
+    Simulator::Schedule(Seconds(time), &Ipv4PathSplicingRoutingHelper::PopulateAllRoutingTables, &m_splicingHelper);
 
-    return elems;
-}
-
-std::vector<std::string> PathSplicingTopologyReader::split(const std::string &s, char delim)
-{
-    std::vector<std::string> elems;
-    return split(s, delim, elems);
-}
-
-void PathSplicingTopologyReader::LoadFailures(std::string failedLinksStr, double time)
-{
-    std::vector<std::string> links = split(failedLinksStr, ';');
-
-    for (std::vector<std::string>::iterator link_it = links.begin(); link_it != links.end(); link_it ++) {
-        std::vector<std::string> ends = split(*link_it, '-');
-
-        if (ends.size() != 2) {
-            NS_LOG_UNCOND("wrong link format: " << *link_it);
-            continue;
-        }
-
-        int end0 = atoi(ends[0].c_str());
-        int end1 = atoi(ends[1].c_str());
-
-        if (end0 > end1) {
-            int tmp = end0;
-            end0 = end1;
-            end1 = tmp;
-        }
-
-        NS_LOG_UNCOND("Fail link " << end0 << "-" << end1);
-        //schedule link failures
-        NS_ASSERT(m_r_r_ic[end0][end1].GetN() == 2);
-        Simulator::Schedule(Seconds(time), &Ipv4::SetDown, m_r_r_ic[end0][end1].Get(0).first, m_r_r_ic[end0][end1].Get(0).second);
-        Simulator::Schedule(Seconds(time), &Ipv4::SetDown, m_r_r_ic[end0][end1].Get(1).first, m_r_r_ic[end0][end1].Get(1).second);
-    }
-}
-
-void PathSplicingTopologyReader::GenerateRandomFailures(double probability, double time)
-{
-    UniformVariable rand;
-    int from, to;
-    std::list<std::pair<std::pair<int, int>, double> >::iterator link_it;
-
-    for (link_it = m_links.begin(); link_it != m_links.end(); link_it ++) {
-        if (rand.GetValue() < probability) {
-            from = (*link_it).first.first;
-            to = (*link_it).first.second;
-            NS_LOG_UNCOND("Fail link " << from << "-" << to);
-
-            NS_ASSERT(m_r_r_ic[from][to].GetN() == 2);
-            Simulator::Schedule(Seconds(time), &Ipv4::SetDown, m_r_r_ic[from][to].Get(0).first, m_r_r_ic[from][to].Get(0).second);
-            Simulator::Schedule(Seconds(time), &Ipv4::SetDown, m_r_r_ic[from][to].Get(1).first, m_r_r_ic[from][to].Get(1).second);
-        }
-    }
+    Simulator::Schedule(Seconds(time + 0.1), &Ipv4::SetDown, m_a_v_ic.Get(0).first, m_a_v_ic.Get(0).second);
+    Simulator::Schedule(Seconds(time + 0.1), &Ipv4::SetDown, m_a_v_ic.Get(1).first, m_a_v_ic.Get(1).second);
 }
 
 } /* namespace ns3 */
