@@ -6,3 +6,5 @@ ns-3.12/different.pcap
 ns-3.12/.lock-wscript
 tags
 *.swp
+ns-3.12/evaluation/backup-*
+ns-3.12/evaluation/result-*
