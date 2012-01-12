@@ -21,7 +21,7 @@ namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE("PathSplicingTopologyReader");
 
-TypeId PathSplicingTopologyReader::GetTypeId (void)
+TypeId PathSplicingTopologyReader::GetTypeId(void)
 {
   static TypeId tid = TypeId("ns3::PathSplicingTopologyReader")
     .SetParent<Object>()

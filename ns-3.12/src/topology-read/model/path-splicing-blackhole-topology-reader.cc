@@ -20,7 +20,7 @@ namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE("PathSplicingBlackholeTopologyReader");
 
-TypeId PathSplicingBlackholeTopologyReader::GetTypeId (void)
+TypeId PathSplicingBlackholeTopologyReader::GetTypeId(void)
 {
   static TypeId tid = TypeId("ns3::PathSplicingBlackholeTopologyReader")
     .SetParent<Object>()
@@ -122,7 +122,7 @@ PathSplicingBlackholeTopologyReader::PathSplicingBlackholeTopologyReader(std::st
         m_r_h_ndc[i] = p2pHelper.Install(nc);
     }
 
-    //attacker pseudo link
+    //attacker-to-victim link
     NodeContainer nc = NodeContainer(m_routers.Get(attackerId), m_hosts.Get(victimId));
     p2pHelper.SetDeviceAttribute("DataRate", StringValue(ssBandwidth.str()));
     p2pHelper.SetChannelAttribute("Delay", StringValue("0.1ms"));
@@ -309,22 +309,20 @@ void PathSplicingBlackholeTopologyReader::LoadServers(double startTime, double s
 void PathSplicingBlackholeTopologyReader::LoadClients(uint32_t maxSlices, uint32_t maxCount, uint32_t maxRetx,
         double packetInterval, double startTime, double stopTime, uint32_t portNumber, uint32_t packetSize)
 {
+    Ptr<Ipv4> ipv4 = m_hosts.Get(m_victimId)->GetObject<Ipv4>();
+    PathSplicingAppClientHelper clientHelper(ipv4->GetAddress(1, 0).GetLocal(), portNumber);
+
+    clientHelper.SetAttribute("MaxSlices", UintegerValue(maxSlices));
+    clientHelper.SetAttribute("MaxPackets", UintegerValue(maxCount));
+    clientHelper.SetAttribute("MaxRetx", UintegerValue(maxRetx));
+    clientHelper.SetAttribute("Interval", TimeValue(Seconds(packetInterval)));
+    clientHelper.SetAttribute("PacketSize", UintegerValue(packetSize));
+
     for (uint32_t i = 0; i < m_hosts.GetN(); i ++) {
-        Ptr<Ipv4> ipv4 = m_hosts.Get(i)->GetObject<Ipv4>();
-        PathSplicingAppClientHelper clientHelper(ipv4->GetAddress(1, 0).GetLocal(), portNumber);
-
-        clientHelper.SetAttribute("MaxSlices", UintegerValue(maxSlices));
-        clientHelper.SetAttribute("MaxPackets", UintegerValue(maxCount));
-        clientHelper.SetAttribute("MaxRetx", UintegerValue(maxRetx));
-        clientHelper.SetAttribute("Interval", TimeValue(Seconds(packetInterval)));
-        clientHelper.SetAttribute("PacketSize", UintegerValue(packetSize));
-
-        for (uint32_t j = 0; j < m_hosts.GetN(); j ++) {
-            if (i != j) {
-                ApplicationContainer ac = clientHelper.Install(m_hosts.Get(j));
-                ac.Start(Seconds(startTime));
-                ac.Stop(Seconds(stopTime));
-            }
+        if (i != m_victimId && i != m_attackerId) {
+            ApplicationContainer ac = clientHelper.Install(m_hosts.Get(i));
+            ac.Start(Seconds(startTime));
+            ac.Stop(Seconds(stopTime));
         }
     }
 }
