@@ -36,8 +36,14 @@ sub run {
         my $seed = time();
         system("echo Seed=$seed > $dir/result-$i");
         chdir("..") or die($!);
-        system("./build/debug/scratch/sprint-path-splicing --SliceNumber=$slices --RetxNumber=$retx --FailedLinks=\"$line\" --RngSeed=$seed >> evaluation/$dir/result-$i 2>&1");
+        if ($line ne "") {
+            system("./build/debug/scratch/sprint-path-splicing --SliceNumber=$slices --RetxNumber=$retx --FailedLinks=\"$line\" --RngSeed=$seed >> evaluation/$dir/result-$i 2>&1");
+        }
+        else {
+            system("./build/debug/scratch/sprint-path-splicing --SliceNumber=$slices --RetxNumber=$retx --RngSeed=$seed >> evaluation/$dir/result-$i 2>&1");
+        }
         chdir("evaluation") or die($!);
+
         $i ++;
     }
 
