@@ -25,8 +25,8 @@ sub run {
     foreach my $i (0 .. $round - 1) {
         $seed = time();
         system("echo Seed=$seed > $dir/result-$i");
-        chdir("..") or die($!);
-        system("./build/debug/scratch/sprint-path-splicing --SliceNumber=$slices --RetxNumber=$retx --FailureProbability=$probability --RngSeed=$seed >> evaluation/$dir/result-$i 2>&1");
-        chdir("evaluation") or die($!);
+        chdir("../..") or die($!);
+        system("./build/debug/scratch/sprint-path-splicing --SliceNumber=$slices --RetxNumber=$retx --FailureProbability=$probability --RngSeed=$seed >> evaluation/failure/$dir/result-$i 2>&1");
+        chdir("evaluation/failure") or die($!);
     }
 }
