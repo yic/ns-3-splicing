@@ -99,10 +99,16 @@ PathSplicingBlackholeTopologyReader::PathSplicingBlackholeTopologyReader(std::st
     //router-to-router links
     std::list<std::pair<std::pair<int, int>, double> >::iterator link_it;
 
+    m_nodeDegree = new uint32_t[node_num];
+    for (uint32_t i = 0; i < node_num; i ++)
+        m_nodeDegree[i] = 0;
+
     for (link_it = m_links.begin(); link_it != m_links.end(); link_it ++)
     {
         from = (*link_it).first.first;
         to = (*link_it).first.second;
+        m_nodeDegree[from] ++;
+        m_nodeDegree[to] ++;
         latency = (*link_it).second;
         ssDelay.str("");
         ssDelay << latency << "ms";
@@ -112,6 +118,9 @@ PathSplicingBlackholeTopologyReader::PathSplicingBlackholeTopologyReader(std::st
         p2pHelper.SetChannelAttribute("Delay", StringValue(ssDelay.str()));
         m_r_r_ndc[from][to] = p2pHelper.Install(nc);
     }
+
+    if (m_nodeDegree[m_victimId] == 1 || m_nodeDegree[m_attackerId] == 1)
+        exit(0);
 
     //router-to-host links
     for (uint32_t i = 0; i < node_num; i ++)
@@ -142,6 +151,8 @@ PathSplicingBlackholeTopologyReader::~PathSplicingBlackholeTopologyReader()
     for (uint32_t i = 0; i < m_nodes.size(); i ++)
         delete [] m_r_r_ic[i];
     delete [] m_r_r_ic;
+
+    delete [] m_nodeDegree;
 }
 
 void PathSplicingBlackholeTopologyReader::LoadPathSplicing(std::string weightFilePrefix, int nSlices)
@@ -319,7 +330,7 @@ void PathSplicingBlackholeTopologyReader::LoadClients(uint32_t maxSlices, uint32
     clientHelper.SetAttribute("PacketSize", UintegerValue(packetSize));
 
     for (uint32_t i = 0; i < m_hosts.GetN(); i ++) {
-        if (i != m_victimId && i != m_attackerId) {
+        if (i != m_victimId && i != m_attackerId && m_nodeDegree[i] > 1) {
             ApplicationContainer ac = clientHelper.Install(m_hosts.Get(i));
             ac.Start(Seconds(startTime));
             ac.Stop(Seconds(stopTime));

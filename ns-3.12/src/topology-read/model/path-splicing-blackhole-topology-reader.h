@@ -38,6 +38,8 @@ private:
     Ipv4InterfaceContainer **m_r_r_ic;
     Ipv4InterfaceContainer m_a_v_ic;
 
+    uint32_t *m_nodeDegree;
+
     uint32_t m_victimId;
     uint32_t m_attackerId;
     Ipv4PathSplicingRoutingHelper m_splicingHelper;
