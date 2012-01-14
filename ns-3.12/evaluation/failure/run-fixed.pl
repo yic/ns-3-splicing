@@ -17,7 +17,7 @@ sub print_usage {
 }
 
 sub run {
-    my $failure_file = "../data/sprint/failures-$probability";
+    my $failure_file = "../../data/sprint/failures-$probability";
 
     if (!(-f $failure_file)) {
         print STDERR "$failure_file does not exist.\n";
