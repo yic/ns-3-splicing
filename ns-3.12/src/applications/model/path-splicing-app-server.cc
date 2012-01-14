@@ -12,6 +12,7 @@
 #include "path-splicing-app-server.h"
 #include "ns3/path-splicing-path-tag.h"
 #include "ns3/path-splicing-serial-tag.h"
+#include "ns3/path-splicing-hops-tag.h"
 //#include "ns3/node-list.h"
 //#include "ns3/ipv4.h"
 
@@ -116,6 +117,9 @@ void PathSplicingAppServer::HandleRead(Ptr<Socket> socket)
             PathSplicingReversePathTag reversePathTag;
             packet->PeekPacketTag(reversePathTag);
 
+            PathSplicingHopsTag hopsTag;
+            packet->PeekPacketTag(hopsTag);
+
             Ptr<Packet> p = Create<Packet>(m_size);
 
             p->AddPacketTag(serialTag);
@@ -126,6 +130,13 @@ void PathSplicingAppServer::HandleRead(Ptr<Socket> socket)
 
             PathSplicingReversePathTag emptyReversePathTag;
             p->AddPacketTag(emptyReversePathTag);
+
+            PathSplicingReverseHopsTag reverseHopsTag;
+            reverseHopsTag = hopsTag;
+            p->AddPacketTag(reverseHopsTag);
+
+            PathSplicingHopsTag emptyHopsTag;
+            p->AddPacketTag(emptyHopsTag);
 
             socket->SendTo(p, 0, from);
         }

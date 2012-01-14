@@ -4,13 +4,14 @@
 #define PATH_SPLICING_HOPS_TAG_H
 
 #include "ns3/tag.h"
+#include "ns3/packet-tag-list.h"
 
 namespace ns3 {
 
 class Node;
 class Packet;
 
-#define PATH_MAX_N_NODES 19
+#define PATH_MAX_N_NODES (PACKET_TAG_MAX_SIZE - 1)
 #define PATH_MAX_NODE_INDEX 256
 
 class PathSplicingHopsTag : public Tag
@@ -31,9 +32,12 @@ public:
     virtual void Print(std::ostream &os) const;
 
     void AddNewNode(int nodeId);
+    std::string ToString();
 
 private:
     std::list<int> m_nodeIndices;
+
+    friend class PathSplicingReverseHopsTag;
 };
 
 class PathSplicingReverseHopsTag: public PathSplicingHopsTag
@@ -41,6 +45,7 @@ class PathSplicingReverseHopsTag: public PathSplicingHopsTag
 public:
     static TypeId GetTypeId(void);
     virtual TypeId GetInstanceTypeId(void) const;
+    PathSplicingReverseHopsTag &operator = (const PathSplicingHopsTag &o);
 };
 
 } // namespace ns3

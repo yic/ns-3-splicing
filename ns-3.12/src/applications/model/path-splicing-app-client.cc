@@ -10,6 +10,7 @@
 #include "ns3/trace-source-accessor.h"
 #include "path-splicing-app-client.h"
 #include "path-splicing-serial-tag.h"
+#include "ns3/path-splicing-hops-tag.h"
 
 namespace ns3 {
 
@@ -145,6 +146,9 @@ void PathSplicingAppClient::Send()
     p->AddPacketTag(m_pathTag);
     p->AddPacketTag(m_reversePathTag);
 
+    PathSplicingHopsTag hopsTag;
+    p->AddPacketTag(hopsTag);
+
     //send packet
     m_socket->Send(p);
 //    NS_LOG_INFO("Node " << GetNode()->GetId() << " send request #" << m_sent << " to " << m_peerAddress);
@@ -250,10 +254,16 @@ void PathSplicingAppClient::HandleRead(Ptr<Socket> socket)
             //cancel the timeout event
             Simulator::Cancel(entry->GetTimeoutEvent());
 
+            PathSplicingReverseHopsTag reverseHopsTag;
+            packet->PeekPacketTag(reverseHopsTag);
+            PathSplicingHopsTag hopsTag;
+            packet->PeekPacketTag(hopsTag);
+
             //update srtt, rttvar, m_rto
             Time rtt = Simulator::Now() - entry->GetSendTime();
             NS_LOG_INFO("Node " << GetNode()->GetId() << " received reply #" << serialNumber << " from " << m_peerAddress <<
-                    " after " << rtt << " (retx=" << entry->GetRetx() << ")");
+                    " after " << rtt << " (retx=" << entry->GetRetx() << ") " << "path: " << GetNode()->GetId() << "-" <<
+                    reverseHopsTag.ToString() << "-" << hopsTag.ToString());
 
             if (entry->GetRetx() > 0)
             {

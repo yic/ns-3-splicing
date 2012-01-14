@@ -94,6 +94,22 @@ void PathSplicingHopsTag::Print(std::ostream &os) const
     os << std::endl;
 }
 
+std::string PathSplicingHopsTag::ToString()
+{
+    std::stringstream ss;
+
+    if (m_nodeIndices.size() > 0) {
+        std::list<int>::const_iterator it = m_nodeIndices.begin();
+        ss << *it;
+        it ++;
+
+        for (; it != m_nodeIndices.end(); it ++)
+            ss << "-" << *it;
+    }
+
+    return ss.str();
+}
+
 void PathSplicingHopsTag::AddNewNode(int nodeId)
 {
     m_nodeIndices.push_back(nodeId);
@@ -111,6 +127,12 @@ TypeId PathSplicingReverseHopsTag::GetTypeId(void)
 TypeId PathSplicingReverseHopsTag::GetInstanceTypeId(void) const
 {
     return GetTypeId();
+}
+
+PathSplicingReverseHopsTag &PathSplicingReverseHopsTag::operator = (const PathSplicingHopsTag &o)
+{
+    m_nodeIndices = o.m_nodeIndices;
+    return *this;
 }
 
 } // namespace ns3

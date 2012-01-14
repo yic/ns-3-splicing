@@ -11,7 +11,7 @@ namespace ns3 {
 class Node;
 class Packet;
 
-#define PATH_SPLICING_MAX_N_HOPS 38
+#define PATH_SPLICING_MAX_N_HOPS 20
 #define PATH_SPLICING_MAX_SLICE_INDEX 16
 
 class PathSplicingPathTag : public Tag

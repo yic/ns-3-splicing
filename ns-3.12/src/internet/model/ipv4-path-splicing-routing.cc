@@ -11,6 +11,7 @@
 #include "ipv4-path-splicing-routing.h"
 #include "ipv4-routing-table-entry.h"
 #include "path-splicing-path-tag.h"
+#include "path-splicing-hops-tag.h"
 
 NS_LOG_COMPONENT_DEFINE("Ipv4PathSplicingRouting");
 
@@ -105,6 +106,11 @@ bool Ipv4PathSplicingRouting::RouteInput(Ptr<const Packet> p, const Ipv4Header &
     Ptr<Packet> packetCopy = p->Copy();
     int slice = GetSliceFromPacket(packetCopy);
     NS_ASSERT(slice < n_slices);
+
+    PathSplicingHopsTag hopsTag;
+    packetCopy->RemovePacketTag(hopsTag);
+    hopsTag.AddNewNode(m_ipv4->GetObject<Node>()->GetId());
+    packetCopy->AddPacketTag(hopsTag);
 
     return m_globalRoutings[slice]->RouteInput(packetCopy, header, idev, ucb, mcb, lcb, ecb);
 }
