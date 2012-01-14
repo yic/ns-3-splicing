@@ -9,21 +9,21 @@ namespace ns3 {
 
 class PathSplicingSerialTag : public Tag
 {
-    public:
-        PathSplicingSerialTag();
+public:
+    PathSplicingSerialTag();
 
-        static TypeId GetTypeId(void);
-        virtual TypeId GetInstanceTypeId(void) const;
+    static TypeId GetTypeId(void);
+    virtual TypeId GetInstanceTypeId(void) const;
 
-        virtual uint32_t GetSerializedSize(void) const;
-        virtual void Serialize(TagBuffer i) const;
-        virtual void Deserialize(TagBuffer i);
-        virtual void Print(std::ostream &os) const;
+    virtual uint32_t GetSerializedSize(void) const;
+    virtual void Serialize(TagBuffer i) const;
+    virtual void Deserialize(TagBuffer i);
+    virtual void Print(std::ostream &os) const;
 
-        void SetSerialNumber(uint32_t serialNumber);
-        uint32_t GetSerialNumber();
-    private:
-        uint32_t m_serialNumber;
+    void SetSerialNumber(uint32_t serialNumber);
+    uint32_t GetSerialNumber();
+private:
+    uint32_t m_serialNumber;
 };
 
 } // namespace ns3
