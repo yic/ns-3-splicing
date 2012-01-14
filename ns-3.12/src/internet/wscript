@@ -186,6 +186,7 @@ def build(bld):
         'model/ipv4-path-splicing-routing.cc',
         'helper/ipv4-path-splicing-routing-helper.cc',
         'model/path-splicing-path-tag.cc',
+        'model/path-splicing-hops-tag.cc',
         ]
 
     internet_test = bld.create_ns3_module_test_library('internet')
@@ -281,6 +282,7 @@ def build(bld):
         'model/ipv4-path-splicing-routing.h',
         'helper/ipv4-path-splicing-routing-helper.h',
         'model/path-splicing-path-tag.h',
+        'model/path-splicing-hops-tag.h',
        ]
 
     if bld.env['NSC_ENABLED']:
