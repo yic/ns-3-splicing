@@ -8,3 +8,4 @@ tags
 *.swp
 ns-3.12/evaluation/failure/backup-*
 ns-3.12/evaluation/failure/result-*
+ns-3.12/evaluation/blackhole/results
