@@ -119,10 +119,10 @@ int PathSplicingPathTag::GetNHops()
     return m_sliceIndices.size();
 }
 
-void PathSplicingPathTag::AddNewHop(int slice)
-{
-    m_sliceIndices.push_front(slice);
-}
+//void PathSplicingPathTag::AddNewHop(int slice)
+//{
+//    m_sliceIndices.push_front(slice);
+//}
 
 int PathSplicingPathTag::GetCurrentHop()
 {

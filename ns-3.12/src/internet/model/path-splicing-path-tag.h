@@ -32,7 +32,7 @@ public:
     virtual void Print(std::ostream &os) const;
 
     int GetNHops();
-    void AddNewHop(int slice);
+//    void AddNewHop(int slice);
     int GetCurrentHop();
     void RemoveCurrentHop();
     void RandomizeTags(UniformVariable &rand, uint32_t max);

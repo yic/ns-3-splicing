@@ -112,6 +112,7 @@ std::string PathSplicingHopsTag::ToString()
 
 void PathSplicingHopsTag::AddNewNode(int nodeId)
 {
+    NS_ASSERT(m_nodeIndices.size() < PATH_MAX_N_NODES);
     m_nodeIndices.push_back(nodeId);
 }
 
