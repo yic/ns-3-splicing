@@ -20,7 +20,7 @@ set yrange[0:100]
 plot [-1:21]\
 'retx-10-20-0.01' using ($1):($3 * 100) title 'slice=10, retx=20, prob=0.01' with line ls 1,\
 'retx-10-20-0.05' using ($1):($3 * 100) title 'slice=10, retx=20, prob=0.05' with line ls 3,\
-'retx-10-20-0.1' using ($1):($3 * 100) title 'slice=10, retx=20, prob=0.1' with line ls 5,\
-'retx-5-20-0.01' using ($1):($3 * 100) title 'slice=5, retx=20, prob=0.01' with line ls 2,\
-'retx-5-20-0.05' using ($1):($3 * 100) title 'slice=5, retx=20, prob=0.05' with line ls 4,\
-'retx-5-20-0.1' using ($1):($3 * 100) title 'slice=5, retx=20, prob=0.1' with line ls 6
+'retx-10-20-0.1' using ($1):($3 * 100) title 'slice=10, retx=20, prob=0.1' with line ls 5
+#'retx-5-20-0.01' using ($1):($3 * 100) title 'slice=5, retx=20, prob=0.01' with line ls 2,\
+#'retx-5-20-0.05' using ($1):($3 * 100) title 'slice=5, retx=20, prob=0.05' with line ls 4,\
+#'retx-5-20-0.1' using ($1):($3 * 100) title 'slice=5, retx=20, prob=0.1' with line ls 6
