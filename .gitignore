@@ -9,3 +9,7 @@ tags
 ns-3.12/evaluation/failure/backup-*
 ns-3.12/evaluation/failure/result-*
 ns-3.12/evaluation/blackhole/results
+ns-3.12/evaluation/failure/retx/retx-*
+ns-3.12/evaluation/failure/retx/delay-*
+ns-3.12/evaluation/failure/retx/stretch-*
+ns-3.12/evaluation/failure/retx/reliability
