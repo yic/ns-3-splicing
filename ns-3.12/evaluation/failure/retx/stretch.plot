@@ -15,12 +15,12 @@ set origin 0,0
 set key bottom right nobox
 set xlabel 'Path Stretch' font "Helvetica, 20"
 set ylabel 'Percent of Points (%)' font "Helvetica, 20"
-set yrange[0:102]
+set yrange[85:102]
 
 plot [0:10]\
-'stretch-10-20-0.01' using ($1):($0 / $2 * 100) title 'slice=10, stretch=20, prob=0.01' with line ls 1,\
-'stretch-10-20-0.05' using ($1):($0 / $2 * 100) title 'slice=10, stretch=20, prob=0.05' with line ls 3,\
-'stretch-10-20-0.1' using ($1):($0 / $2 * 100) title 'slice=10, stretch=20, prob=0.1' with line ls 5
-#'stretch-5-20-0.01' using ($1):($0 / $2 * 100) title 'slice=5, stretch=20, prob=0.01' with line ls 2,\
-#'stretch-5-20-0.05' using ($1):($0 / $2 * 100) title 'slice=5, stretch=20, prob=0.05' with line ls 4,\
-#'stretch-5-20-0.1' using ($1):($0 / $2 * 100) title 'slice=5, stretch=20, prob=0.1' with line ls 6
+'stretch-10-20-0.01' using ($1):($0 / $2 * 100) title 'slice=10, retx=20, prob=0.01' with line ls 1,\
+'stretch-10-20-0.05' using ($1):($0 / $2 * 100) title 'slice=10, retx=20, prob=0.05' with line ls 3,\
+'stretch-10-20-0.1' using ($1):($0 / $2 * 100) title 'slice=10, retx=20, prob=0.1' with line ls 5
+#'stretch-5-20-0.01' using ($1):($0 / $2 * 100) title 'slice=5, retx=20, prob=0.01' with line ls 2,\
+#'stretch-5-20-0.05' using ($1):($0 / $2 * 100) title 'slice=5, retx=20, prob=0.05' with line ls 4,\
+#'stretch-5-20-0.1' using ($1):($0 / $2 * 100) title 'slice=5, retx=20, prob=0.1' with line ls 6
