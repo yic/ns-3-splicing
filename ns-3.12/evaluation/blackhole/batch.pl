@@ -6,7 +6,7 @@ my $slices, $retx, $round;
 my %pairs = ();
 my $attacker, $victim;
 
-foreach $i (1 .. $round) {
+foreach $i (0 .. $round - 1) {
     $victim = int(rand(52));
     $attacker = int(rand(52));
 
@@ -17,7 +17,7 @@ foreach $i (1 .. $round) {
 
     $pairs{$victim}{$attacker} = 1;
 
-    system("./run.pl $slices $retx $victim $attacker");
+    system("./run.pl $slices $retx $victim $attacker $i");
 }
 
 sub print_usage {
