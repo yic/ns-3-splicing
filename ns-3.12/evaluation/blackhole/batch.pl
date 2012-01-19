@@ -1,28 +1,33 @@
 #!/usr/bin/perl
 
-my $slices, $retx, $min, $max, $round;
+my $slices, $retx, $round;
 &print_usage;
 
-my $node_num = 52;
+my %pairs = ();
+my $attacker, $victim;
 
-foreach my $i (0 .. $node_num - 1) {
-    foreach my $j ($min .. $max) {
-        if ($i != $j) {
-            system("./run.pl $slices $retx $i $j $round");
-        }
+foreach $i (1 .. $round) {
+    $victim = int(rand(52));
+    $attacker = int(rand(52));
+
+    while ($victim == $attacker || exists($pairs{$victim}{$attacker})) {
+        $victim = int(rand(52));
+        $attacker = int(rand(52));
     }
+
+    $pairs{$victim}{$attacker} = 1;
+
+    system("./run.pl $slices $retx $victim $attacker");
 }
 
 sub print_usage {
-    if (@ARGV != 5) {
-        print STDERR "Usage: $0 slices retx min max round\n";
+    if (@ARGV != 3) {
+        print STDERR "Usage: $0 slices retx round\n";
         exit(-1);
     }
 
     $slices = $ARGV[0];
     $retx = $ARGV[1];
-    $min = $ARGV[2];
-    $max = $ARGV[3];
-    $round = $ARGV[4];
+    $round = $ARGV[2];
 }
 

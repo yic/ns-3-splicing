@@ -119,8 +119,8 @@ PathSplicingBlackholeTopologyReader::PathSplicingBlackholeTopologyReader(std::st
         m_r_r_ndc[from][to] = p2pHelper.Install(nc);
     }
 
-    if (m_nodeDegree[m_victimId] == 1 || m_nodeDegree[m_attackerId] == 1)
-        exit(0);
+//  if (m_nodeDegree[m_victimId] == 1 || m_nodeDegree[m_attackerId] == 1)
+//      exit(0);
 
     //router-to-host links
     for (uint32_t i = 0; i < node_num; i ++)
@@ -330,7 +330,8 @@ void PathSplicingBlackholeTopologyReader::LoadClients(uint32_t maxSlices, uint32
     clientHelper.SetAttribute("PacketSize", UintegerValue(packetSize));
 
     for (uint32_t i = 0; i < m_hosts.GetN(); i ++) {
-        if (i != m_victimId && i != m_attackerId && m_nodeDegree[i] > 1) {
+//      if (i != m_victimId && i != m_attackerId && m_nodeDegree[i] > 1) {
+        if (i != m_victimId && i != m_attackerId) {
             ApplicationContainer ac = clientHelper.Install(m_hosts.Get(i));
             ac.Start(Seconds(startTime));
             ac.Stop(Seconds(stopTime));
