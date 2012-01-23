@@ -1,33 +1,25 @@
 #!/usr/bin/perl
 
-my $slices, $retx, $round;
+my $slices, $retx, $start, $end;
 &print_usage;
 
-my %pairs = ();
-my $attacker, $victim;
-
-foreach $i (0 .. $round - 1) {
-    $victim = int(rand(52));
-    $attacker = int(rand(52));
-
-    while ($victim == $attacker || exists($pairs{$victim}{$attacker})) {
-        $victim = int(rand(52));
-        $attacker = int(rand(52));
+foreach $i (0 .. 51) {
+    foreach $j ($start .. $end) {
+        if ($i != $j) {
+            system("./run.pl $slices $retx $i $j");
+        }
     }
-
-    $pairs{$victim}{$attacker} = 1;
-
-    system("./run.pl $slices $retx $victim $attacker $i");
 }
 
 sub print_usage {
-    if (@ARGV != 3) {
-        print STDERR "Usage: $0 slices retx round\n";
+    if (@ARGV != 4) {
+        print STDERR "Usage: $0 slices retx start end\n";
         exit(-1);
     }
 
     $slices = $ARGV[0];
     $retx = $ARGV[1];
-    $round = $ARGV[2];
+    $start = $ARGV[2];
+    $end = $ARGV[3];
 }
 

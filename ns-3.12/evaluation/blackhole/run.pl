@@ -1,13 +1,13 @@
 #!/usr/bin/perl
 
-my $slices, $retx, $victim, $attacker, $index;
+my $slices, $retx, $victim, $attacker;
 &print_usage;
 
 &run;
 
 sub print_usage {
-    if (@ARGV != 5) {
-        print STDERR "Usage: $0 slices retx victim attacker index\n";
+    if (@ARGV != 4) {
+        print STDERR "Usage: $0 slices retx victim attacker\n";
         exit(-1);
     }
 
@@ -15,7 +15,6 @@ sub print_usage {
     $retx = $ARGV[1];
     $victim = $ARGV[2];
     $attacker = $ARGV[3];
-    $index = $ARGV[4];
 }
 
 sub run {
@@ -25,8 +24,8 @@ sub run {
     my $seed;
 
     $seed = time();
-    system("echo Seed=$seed Victim=$victim Attacker=$attacker > $dir/result-$index");
+    system("echo Seed=$seed Victim=$victim Attacker=$attacker > $dir/result-$victim-$attacker");
     chdir("../..") or die($!);
-    system("./build/debug/scratch/sprint-path-splicing-blackhole --SliceNumber=$slices --RetxNumber=$retx --VictimId=$victim --AttackerId=$attacker --RngSeed=$seed >> evaluation/blackhole/$dir/result-$index 2>&1");
+    system("./build/debug/scratch/sprint-path-splicing-blackhole --SliceNumber=$slices --RetxNumber=$retx --VictimId=$victim --AttackerId=$attacker --RngSeed=$seed >> evaluation/blackhole/$dir/result-$victim-$attacker 2>&1");
     chdir("evaluation/blackhole") or die($!);
 }
