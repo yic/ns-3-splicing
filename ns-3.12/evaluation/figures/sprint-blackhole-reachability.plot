@@ -10,7 +10,8 @@ set key outside right top vertical Left reverse enhanced autotitles columnhead n
 set key invert samplen 4 spacing 3 width 3 height 0 font "Helvetica, 20"
 set style histogram rowstacked title offset character 0, 0, 0
 set style data histograms
-set xtics border in scale 1,0.5 nomirror offset character 0, 0, 0 font "Helvetica, 25"
+set xlabel "Forwarding Mechanism" font "Helvetica, 25"
+set xtics border in scale 1,0.5 nomirror offset character 0, 0, 0 font "Helvetica, 20"
 set xtics ("NDN" 1.00000 -1, "Path Splicing" 2.00000 -1, "IP" 3.00000 -1)
 set ylabel "Percentage of Flows (%)" font "Helvetica, 25"
 set yrange [0.00000:100.000] noreverse nowriteback
