@@ -15,5 +15,5 @@ set xtics ("NDN" 1.00000 -1, "Path Splicing" 2.00000 -1, "IP" 3.00000 -1)
 set title ""
 set ylabel "Percentage of Flows" font "Helvetica, 22"
 set yrange [0.00000:100.000] noreverse nowriteback
-plot 'sprint-blackhole-reachability.dat' using ($2 * 100) lt -1 fill pattern 0, '' using ($3 * 100) lt -1 fill pattern 4, '' using ($4 * 100) lt -1 fill pattern 2
+plot 'sprint-blackhole-reachability.dat' using ($2 * 100) lt -1 fill pattern 0, '' using ($3 * 100) lt -1 fill pattern 4, '' using ($4 * 100) lt -1 fill pattern 1
 #plot 'sprint-blackhole-reachability.dat' using ($2 * 100) lt 3, '' using ($3 * 100) lt 2, '' using ($4 * 100) lt 1
