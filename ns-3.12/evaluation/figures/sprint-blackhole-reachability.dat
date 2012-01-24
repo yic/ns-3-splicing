@@ -1,0 +1,5 @@
+Mechanism       Unaffected      Recoverable     Unreachable
+NDN             0.946786929     0.0363426572    0.0168704138
+PathSplicing    0.4996003017    0.059653092     0.4407466063
+IP              0.4996003017    0               0.5003996983
+

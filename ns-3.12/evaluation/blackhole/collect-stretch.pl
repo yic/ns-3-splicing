@@ -111,7 +111,12 @@ sub collect {
 #                        print "$src $dst $latency_stretch $weight_stretch\n";
                         push(@array, $weight_stretch);
                     }
+                    elsif ($line =~ /Node (\d+) give up request #1 to 192.168.(\d+).2/) {
+                        $src = $1 - 52;
+                        $dst = $2;
 
+                        push(@array, 10000);
+                    }
                 }
 
                 close(FILE);
