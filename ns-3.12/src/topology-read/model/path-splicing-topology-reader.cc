@@ -110,8 +110,8 @@ PathSplicingTopologyReader::PathSplicingTopologyReader(std::string latencyFileNa
     for (uint32_t i = 0; i < node_num; i ++)
     {
         NodeContainer nc = NodeContainer(m_routers.Get(i), m_hosts.Get(i));
-        p2pHelper.SetDeviceAttribute("DataRate", StringValue(ssBandwidth.str()));
-        p2pHelper.SetChannelAttribute("Delay", StringValue("0.1ms"));
+        p2pHelper.SetDeviceAttribute("DataRate", StringValue("10Gbps"));
+        p2pHelper.SetChannelAttribute("Delay", StringValue("0.1ns"));
         m_r_h_ndc[i] = p2pHelper.Install(nc);
     }
 }
