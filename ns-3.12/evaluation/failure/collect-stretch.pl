@@ -7,7 +7,7 @@ my %latency, %weight;
 &read_latency;
 &read_weight;
 
-my %shortest_latency, %shortest_weight, %current_latency, %current_weight;
+my %shortest_latency, %shortest_weight, %old_shortest_latency, %old_shortest_weight, %current_latency, %current_weight;
 my @array;
 &collect($prob);
 
@@ -68,15 +68,24 @@ sub collect {
         my $src, $dst, $path, @path_array;
 
         while (my $file = readdir(DIR)) {
-            if ($file =~ /^result-\d+$/) {
+            if ($file =~ /^result-(\d+)$/) {
+                my $k = $1;
+                my $shortest_file = "../stretch/result-$probability/result-$k";
+                if (!(-e $shortest_file)) {
+                    print STDERR "file $shortest_file does not exist";
+                    exit;
+                }
+
                 %shortest_latency = ();
                 %shortest_weight = ();
+                %old_shortest_latency = ();
+                %old_shortest_weight = ();
                 %current_latency = ();
                 %current_weight = ();
 
-                open(FILE, "< $dir/$file");
+                open(SHORTEST, "< $shortest_file");
 
-                while (my $line = <FILE>) {
+                while (my $line = <SHORTEST>) {
                     chomp($line);
 
                     if ($line =~ /Node (\d+) received reply #0 from 192.168.(\d+).2 .+ path: (.+)/) {
@@ -91,8 +100,31 @@ sub collect {
                                 $shortest_weight{$src}{$dst} += $weight{$path_array[$i]}{$path_array[$i + 1]};
                             }
                         }
+#                        print "$src $dst $shortest_latency{$src}{$dst}\n";
+                    }
+                }
 
-#                        print "$src $dst $shortest_latency{$src}{$dst} $shortest_weight{$src}{$dst}\n";
+                close(SHORTEST);
+
+                open(FILE, "< $dir/$file");
+
+                while (my $line = <FILE>) {
+                    chomp($line);
+
+                    if ($line =~ /Node (\d+) received reply #0 from 192.168.(\d+).2 .+ path: (.+)/) {
+                        $src = $1 - 52;
+                        $dst = $2;
+                        $path = $3;
+                        @path_array = split("-", $path);
+
+                        foreach my $i (0 .. @path_array - 2) {
+                            if ($path_array[$i] < 52 and $path_array[$i + 1] < 52) {
+                                $old_shortest_latency{$src}{$dst} += $latency{$path_array[$i]}{$path_array[$i + 1]};
+                                $old_shortest_weight{$src}{$dst} += $weight{$path_array[$i]}{$path_array[$i + 1]};
+                            }
+                        }
+
+#                        print "$src $dst $old_shortest_latency{$src}{$dst} $old_shortest_weight{$src}{$dst}\n";
                     }
                     elsif ($line =~ /Node (\d+) received reply #1 from 192.168.(\d+).2 .+ path: (.+)/) {
                         $src = $1 - 52;
@@ -108,15 +140,16 @@ sub collect {
                         }
 
 #                        print "$src $dst $current_latency{$src}{$dst} $current_weight{$src}{$dst}\n";
-                        my $latency_stretch = $current_latency{$src}{$dst} / $shortest_latency{$src}{$dst};
+#                        my $latency_stretch = $current_latency{$src}{$dst} / $shortest_latency{$src}{$dst};
                         my $weight_stretch = $current_weight{$src}{$dst} / $shortest_weight{$src}{$dst};
-#                        print "$src $dst $latency_stretch $weight_stretch\n";
+#                        print "$src $dst $current_weight{$src}{$dst} $shortest_weight{$src}{$dst} $old_shortest_weight{$src}{$dst} $weight_stretch\n";
                         push(@array, $weight_stretch);
                     }
 
                 }
 
                 close(FILE);
+#                last;
             }
         }
 
