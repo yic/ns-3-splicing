@@ -19,11 +19,11 @@ int main (int argc, char *argv[])
 
     uint32_t linkBandwidth = 100;
     uint32_t nSlices = 1;
-    uint32_t nPackets = 2;
+    uint32_t nPackets = 1;
     uint32_t nRetx = 0;
     double packetInterval = 50.0;
 
-    double appStartTime = 1.0;
+    double appStartTime = 50.0;
     double appStopTime = 100.0;
     uint32_t nAppPort = 9;
     uint32_t nRequestSize = 1024;
