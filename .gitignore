@@ -16,3 +16,4 @@ ns-3.12/evaluation/failure/retx/delay-*
 ns-3.12/evaluation/failure/retx/stretch-*
 ns-3.12/evaluation/failure/retx/reliability
 ns-3.12/evaluation/figures/*.eps
+ns-3.12/evaluation/stretch/result-*
