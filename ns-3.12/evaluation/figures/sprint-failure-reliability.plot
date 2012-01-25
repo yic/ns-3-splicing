@@ -2,11 +2,11 @@ set term postscript eps color enh
 set output 'sprint-failure-reliability.eps'
 
 unset grid
-set style line 1 lt 6 lw 3 pt 1 ps 2 lc rgb "blue"
-set style line 2 lt 2 lw 3 pt 4 ps 2 lc rgb "red"
-set style line 3 lt 1 lw 3 pt 6 ps 2 lc rgb "black"
-set style line 4 lt 4 lw 3 pt 2 ps 2 lc rgb "blue'
-set style line 5 lt 5 lw 3 pt 8 ps 2 lc rgb "red"
+set style line 1 lt 6 lw 2 pt 1 ps 1.5 lc rgb "blue"
+set style line 2 lt 2 lw 2 pt 8 ps 1.5 lc rgb "red"
+set style line 3 lt 5 lw 2 pt 6 ps 1.5 lc rgb "black"
+set style line 4 lt 4 lw 2 pt 2 ps 1.5 lc rgb "blueviolet
+set style line 5 lt 1 lw 2 pt 4 ps 1.5 lc rgb "brown"
 
 set key inside left top vertical enhanced nobox
 set key noinvert samplen 6 spacing 3 width 3 height 0 font "Helvetica, 20"
