@@ -156,7 +156,10 @@ sub collect {
         my @sorted = sort {$a <=> $b} @array;
         my $num = @array;
         foreach my $k (@sorted) {
-            print "$k $num\n";
+            print "$k 2652000\n";
+        }
+        foreach my $k (1 .. 2652000 - $num) {
+            print "10000 2652000\n";
         }
     }
     else {
