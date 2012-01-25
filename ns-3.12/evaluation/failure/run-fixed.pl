@@ -37,10 +37,10 @@ sub run {
         system("echo Seed=$seed > $dir/result-$i");
         chdir("../..") or die($!);
         if ($line ne "") {
-            system("./build/debug/scratch/sprint-path-splicing --SliceNumber=$slices --RetxNumber=$retx --FailedLinks=\"$line\" --RngSeed=$seed >> evaluation/failure/$dir/result-$i 2>&1");
+            system("./build/debug/scratch/sprint-path-splicing --SliceNumber=$slices --RetxNumber=$retx --FailedLinks=\"$line\" --LinkBandwidth=100 --RequestSize=40 --ResponseSize=1040 --RngSeed=$seed >> evaluation/failure/$dir/result-$i 2>&1");
         }
         else {
-            system("./build/debug/scratch/sprint-path-splicing --SliceNumber=$slices --RetxNumber=$retx --RngSeed=$seed >> evaluation/failure/$dir/result-$i 2>&1");
+            system("./build/debug/scratch/sprint-path-splicing --SliceNumber=$slices --RetxNumber=$retx --LinkBandwidth=100 --RequestSize=40 --ResponseSize=1040 --RngSeed=$seed >> evaluation/failure/$dir/result-$i 2>&1");
         }
         chdir("evaluation/failure") or die($!);
 

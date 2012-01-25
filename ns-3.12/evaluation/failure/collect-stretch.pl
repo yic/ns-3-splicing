@@ -8,6 +8,7 @@ my %latency, %weight;
 &read_weight;
 
 my %shortest_latency, %shortest_weight, %old_shortest_latency, %old_shortest_weight, %current_latency, %current_weight;
+my %unaffected;
 my @array;
 &collect($prob);
 
@@ -76,12 +77,19 @@ sub collect {
                     exit;
                 }
 
+                my $unaffected_file = "result-1-5-$probability/result-$k";
+                if (!(-e $unaffected_file)) {
+                    print STDERR "file $unaffected_file does not exist";
+                    exit;
+                }
+
                 %shortest_latency = ();
                 %shortest_weight = ();
                 %old_shortest_latency = ();
                 %old_shortest_weight = ();
                 %current_latency = ();
                 %current_weight = ();
+                %unaffected = ();
 
                 open(SHORTEST, "< $shortest_file");
 
@@ -105,6 +113,21 @@ sub collect {
                 }
 
                 close(SHORTEST);
+
+                open(UNAFFECTED, "< $unaffected_file");
+
+                while (my $line = <UNAFFECTED>) {
+                    chomp($line);
+
+                    if ($line =~ /Node (\d+) received reply #1 from 192.168.(\d+).2 .+ path: (.+)/) {
+                        $src = $1 - 52;
+                        $dst = $2;
+
+                        $unaffected{$src}{$dst} = 1;
+                    }
+                }
+
+                close(UNAFFECTED);
 
                 open(FILE, "< $dir/$file");
 
@@ -139,13 +162,26 @@ sub collect {
                             }
                         }
 
+                        my $weight_stretch = $current_weight{$src}{$dst} / $shortest_weight{$src}{$dst};
+
+                        if (!exists($unaffected{$src}{$dst})) {
 #                        print "$src $dst $current_latency{$src}{$dst} $current_weight{$src}{$dst}\n";
 #                        my $latency_stretch = $current_latency{$src}{$dst} / $shortest_latency{$src}{$dst};
-                        my $weight_stretch = $current_weight{$src}{$dst} / $shortest_weight{$src}{$dst};
 #                        print "$src $dst $current_weight{$src}{$dst} $shortest_weight{$src}{$dst} $old_shortest_weight{$src}{$dst} $weight_stretch\n";
-                        push(@array, $weight_stretch);
+                            push(@array, $weight_stretch);
+                        }
+                        elsif ($weight_stretch != 1) {
+                            print STDERR "error!!!\n";
+                        }
                     }
+                    elsif ($line =~ /Node (\d+) give up request #1 to 192.168.(\d+).2/) {
+                        $src = $1 - 52;
+                        $dst = $2;
 
+                        if ($shortest_weight{$src}{$dst}) {
+                            push(@array, 10000);
+                        }
+                    }
                 }
 
                 close(FILE);
@@ -156,10 +192,7 @@ sub collect {
         my @sorted = sort {$a <=> $b} @array;
         my $num = @array;
         foreach my $k (@sorted) {
-            print "$k 2652000\n";
-        }
-        foreach my $k (1 .. 2652000 - $num) {
-            print "10000 2652000\n";
+            print "$k $num\n";
         }
     }
     else {
