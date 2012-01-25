@@ -5,6 +5,7 @@
 #include "ns3/node-container.h"
 #include "ns3/net-device-container.h"
 #include "ns3/ipv4-interface-container.h"
+#include "ns3/ipv4-path-splicing-routing-helper.h"
 
 namespace ns3 {
 
@@ -22,6 +23,7 @@ public:
             double startTime, double stopTime, uint32_t portNumber, uint32_t packetSize);
     void LoadFailures(std::string failedLinksStr, double time);
     void GenerateRandomFailures(double probability, double time);
+    void ScheduleRoutingRecomputation(double time);
 private:
     NodeContainer m_routers;
     NodeContainer m_hosts;
@@ -36,6 +38,8 @@ private:
 
     std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems);
     std::vector<std::string> split(const std::string &s, char delim);
+
+    Ipv4PathSplicingRoutingHelper m_splicingHelper;
 };
 
 }; // end namespace ns3
