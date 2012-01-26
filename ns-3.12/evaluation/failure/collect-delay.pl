@@ -25,10 +25,11 @@ sub collect {
     if (-d $dir) {
         opendir(DIR, "$dir");
 
-        my $src, $dst, $rtt, $retx;
+        my $src, $dst, $rtt, $retx, $run;
 
         while (my $file = readdir(DIR)) {
-            if ($file =~ /^result-\d+$/) {
+            if ($file =~ /^result-(\d+)$/) {
+                $run = $1;
                 %shortest_latency = ();
                 %shortest_weight = ();
                 %current_latency = ();
@@ -59,8 +60,8 @@ sub collect {
 
                         $current_latency{$src}{$dst} = $shortest_latency{$src}{$dst} * $retx + $rtt;
 
-#                        print "$src $dst $current_latency{$src}{$dst}\n";
-                        push(@array, $current_latency{$src}{$dst});
+                        print "$run $src $dst $current_latency{$src}{$dst}\n";
+#                        push(@array, $current_latency{$src}{$dst});
                     }
                 }
 
@@ -68,11 +69,11 @@ sub collect {
             }
         }
 
-        my @sorted = sort {$a <=> $b} @array;
-        my $num = @array;
-        foreach my $k (@sorted) {
-            print "$k $num\n";
-        }
+#       my @sorted = sort {$a <=> $b} @array;
+#       my $num = @array;
+#       foreach my $k (@sorted) {
+#           print "$k $num\n";
+#       }
     }
     else {
         print STDERR "Directory $dir does not exist\n";
