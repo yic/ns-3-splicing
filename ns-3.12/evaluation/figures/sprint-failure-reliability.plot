@@ -5,8 +5,9 @@ unset grid
 set style line 1 lt 6 lw 2 pt 1 ps 1.5 lc rgb "blue"
 set style line 2 lt 2 lw 2 pt 8 ps 1.5 lc rgb "red"
 set style line 3 lt 5 lw 2 pt 6 ps 1.5 lc rgb "black"
-set style line 4 lt 4 lw 2 pt 2 ps 1.5 lc rgb "blueviolet
-set style line 5 lt 1 lw 2 pt 4 ps 1.5 lc rgb "brown"
+set style line 4 lt 4 lw 2 pt 2 ps 1.5 lc rgb "magenta"
+set style line 5 lt 1 lw 2 pt 4 ps 1.5 lc rgb "blueviolet"
+set style line 6 lt 7 lw 2 pt 3 ps 1.5 lc rgb "brown"
 
 set key inside left top vertical enhanced nobox
 set key noinvert samplen 6 spacing 3 width 3 height 0 font "Helvetica, 20"
@@ -24,4 +25,6 @@ plot [0:10]\
 'sprint-failure-reliability.dat' using ($1 * 100):($6 * 100) title '' with line ls 4,\
 'sprint-failure-reliability-point.dat' using ($1 * 100):($6 * 100) title 'Path Splicing (s=10, r=20)' with linespoints ls 4,\
 'sprint-failure-reliability.dat' using ($1 * 100):($7 * 100) title '' with line ls 5,\
-'sprint-failure-reliability-point.dat' using ($1 * 100):($7 * 100) title 'NDN' with linespoints ls 5
+'sprint-failure-reliability-point.dat' using ($1 * 100):($7 * 100) title 'NDN' with linespoints ls 5,\
+'sprint-failure-reliability.dat' using ($1 * 100):($8 * 100) title '' with line ls 6,\
+'sprint-failure-reliability-point2.dat' using ($1 * 100):($8 * 100) title 'Perfect Switching' with linespoints ls 6
