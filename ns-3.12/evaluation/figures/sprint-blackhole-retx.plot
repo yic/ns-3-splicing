@@ -13,7 +13,7 @@ set style data histograms
 set xlabel "Number of Retransmissions" font "Helvetica, 25"
 set xtics border in scale 1,0.5 nomirror offset character 0, 0, 0 font "Helvetica, 20"
 set xtics ("5" 4, "10" 9, "15" 14, "20" 19)
-set ylabel "Percentage of Tuples (%)" font "Helvetica, 25"
+set ylabel "Percent of Tuples (%)" font "Helvetica, 25"
 set yrange [0:2.5] noreverse nowriteback
 #plot 'sprint-blackhole-retx.dat' using 2 ti col lt -1 lc 1, '' using 3 ti col lt -1 lc 3
 #plot 'sprint-blackhole-retx.dat' using 2 ti col fill pattern 1 lt -1 lc 1, '' using 3 ti col lt -1 lc 3 fill pattern 4
