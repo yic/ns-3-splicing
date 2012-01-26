@@ -1,0 +1,51 @@
+#!/usr/bin/perl
+
+&print_usage;
+
+my @probabilities = (0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1);
+
+foreach my $p (@probabilities) {
+    &collect($p);
+}
+
+sub print_usage {
+    if (@ARGV != 0) {
+        print STDERR "Usage: $0\n";
+        exit(-1);
+    }
+}
+
+sub collect {
+    my ($probability) = @_;
+    my $dir = "result-$probability";
+
+    if (-d $dir) {
+        opendir(DIR, "$dir");
+
+        my $received, $giveup, $total_received, $total_giveup;
+        $total_received = $total_giveup = 0;
+
+        while (my $file = readdir(DIR)) {
+            if ($file =~ /^result-\d+$/) {
+                $received = `grep "received reply #0" $dir\/$file | wc -l`;
+                $giveup = `grep "give up request #0" $dir\/$file | wc -l`;
+
+                chomp($received);
+                chomp($giveup);
+
+                if ($received + $giveup != 2652) {
+                    print STDERR "File $file error\n";
+                }
+                else {
+                    $total_received += $received;
+                    $total_giveup += $giveup;
+                }
+            }
+        }
+
+        print "$probability $total_received $total_giveup" . " " . $total_giveup / ($total_received + $total_giveup) . "\n";
+    }
+    else {
+        print STDERR "Directory $dir does not exist\n";
+    }
+}
