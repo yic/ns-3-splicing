@@ -3,7 +3,7 @@ set output 'sprint-failure-stretch.eps'
 
 unset grid
 set style line 1 lt 2 lw 3 pt 1 ps 2 lc rgb "red"
-set style line 2 lt 1 lw 3 pt 2 ps 2 lc rgb "blue"
+set style line 2 lt 1 lw 3 pt 4 ps 2 lc rgb "blue"
 
 set key inside right bottom vertical enhanced nobox
 set key noinvert samplen 6 spacing 2.5 width 3 height 1.5 font "Helvetica, 18"

@@ -16,7 +16,7 @@ set multiplot
 set size 1,0.5
 
 set origin 0,0.5
-set xlabel 'Search Time (ms) with 1% Link Failure Probability' font "Helvetica, 21"
+set xlabel 'Data Retrieval Time (ms) with 1% Link Failure Probability' font "Helvetica, 21"
 plot [1:6000]\
 'sprint-failure-ndn-delay-0.01.dat' using ($1):($0 / $2 * 100) title '' with line ls 1,\
 'sprint-failure-ndn-delay-0.01.point' using ($1):($2 * 100) title 'NDN' with linespoints ls 1,\
@@ -24,7 +24,7 @@ plot [1:6000]\
 'sprint-failure-splicing-delay-0.01.point' using ($1):($2 * 100) title 'Path Splicing' with linespoints ls 2
 
 set origin 0,0
-set xlabel 'Search Time (ms) with 10% Link Failure Probability' font "Helvetica, 21"
+set xlabel 'Data Retrieval Time (ms) with 10% Link Failure Probability' font "Helvetica, 21"
 plot [1:6000]\
 'sprint-failure-ndn-delay-0.1.dat' using ($1):($0 / $2 * 100) title '' with line ls 1,\
 'sprint-failure-ndn-delay-0.1.point' using ($1):($2 * 100) title 'NDN' with linespoints ls 1,\
